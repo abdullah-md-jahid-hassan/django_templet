@@ -1,0 +1,81 @@
+# docker-compose.local.yml
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: softvence/django_template:latest
+    container_name: dt_web
+    command: >
+      gunicorn kilianRohde.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 2
+      --threads 2
+      --timeout 60
+      --reload
+    env_file:
+      - .env
+    environment:
+      RUN_MIGRATIONS: "1"
+    volumes:
+      - .:/app:delegated
+    ports:
+      - "8080:8000"
+    depends_on:
+      - db
+      - redis
+
+  celery_worker:
+    image: softvence/django_template:latest
+    container_name: dt_celery_worker
+    command: python -m celery -A kilianRohde.celery worker -l info
+    working_dir: /app
+    env_file:
+      - .env
+    environment:
+      RUN_MIGRATIONS: "0"
+      PYTHONPATH: /app
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+
+  celery_beat:
+    image: softvence/django_template:latest
+    container_name: dt_celery_beat
+    command: python -m celery -A kilianRohde.celery beat -l info
+    working_dir: /app
+    env_file:
+      - .env
+    environment:
+      RUN_MIGRATIONS: "0"
+      PYTHONPATH: /app
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15-alpine
+    container_name: dt_postgres
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: dt_redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:

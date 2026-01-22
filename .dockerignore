@@ -1,0 +1,40 @@
+# ===== Git =====
+.git
+.gitignore
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# ===== Virtual Environments =====
+venv/
+.venv/
+.env
+.env.*
+
+# ===== Django =====
+db.sqlite3
+media/
+staticfiles/
+*.log
+
+# ===== Tests & Docs =====
+tests/
+docs/
+htmlcov/
+.pytest_cache/
+
+# ===== IDEs =====
+.vscode/
+.idea/
+
+# ===== OS Files =====
+.DS_Store
+Thumbs.db
+
+# ===== Build Artifacts =====
+build/
+dist/
+*.egg-info/
