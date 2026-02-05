@@ -11,25 +11,56 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from my_django.env_config import EnvConfig
+from datetime import timedelta
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
+# =========================================
+# Default User Model
+# =========================================
+AUTH_USER_MODEL = 'authentication.User'
+
+# =========================================
+# load CONFIG
+# =========================================
+CONFIG = EnvConfig()
+
+
+# =========================================
+# Security
+# =========================================
+# Basic
+SECRET_KEY = CONFIG.SECRET_KEY
+DEBUG = CONFIG.DEBUG
+ALLOWED_HOSTS = CONFIG.ALLOWED_HOSTS if not DEBUG else ['*']
+
+
+# =========================================
+# Base Config
+# =========================================
 BASE_DIR = Path(__file__).resolve().parent.parent
+ROOT_URLCONF = 'my_django.urls'
+WSGI_APPLICATION = 'my_django.wsgi.application'
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-k06@=et&fjz9#j#x88k^e)b0#ep38-iwor^r296t=ss=cxs69b'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+# =========================================
+# Internationalization
+# =========================================
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
 
 
+# =========================================
+# Static files (CSS, JavaScript, Images)
+# =========================================
+STATIC_URL = 'static/'
+
+
+# =========================================
 # Application definition
-
+# =========================================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,20 +68,54 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Third-party apps
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    "corsheaders",
+
+    # Self Define
+    'authentication',
+    'core',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'my_django.urls'
 
+# =========================================
+# Django Rest Framework
+# =========================================
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "20/min",
+        "user": "200/min",
+    },
+}
+
+
+
+# =========================================
+# Template
+# =========================================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -66,23 +131,34 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'my_django.wsgi.application'
 
-
+# =========================================
 # Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# =========================================
+DB_ENGINE = CONFIG.DB_ENGINE
+if (DB_ENGINE == 'django.db.backends.sqlite3'):
+    DATABASES = {
+        'default': {
+            'ENGINE': DB_ENGINE,
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': DB_ENGINE,
+            'NAME': CONFIG.DB_NAME,
+            'USER': CONFIG.DB_USER,
+            'PASSWORD': CONFIG.DB_PASSWORD,
+            'HOST': CONFIG.DB_HOST,
+            'PORT': CONFIG.DB_PORT,
+        }
+    }
 
 
+# =========================================
 # Password validation
-# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
-
+# =========================================
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -99,19 +175,75 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
+# =========================================
+# Redis
+# =========================================
+REDIS_URL = CONFIG.REDIS_URL
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
+# =========================================
+# Cache
+# =========================================
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            }
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
 
-STATIC_URL = 'static/'
+
+# =========================================
+# Celery
+# =========================================
+CELERY_BROKER_URL = CONFIG.CELERY_BROKER_URL
+CELERY_RESULT_BACKEND = CONFIG.CELERY_RESULT_BACKEND
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+
+# =========================================
+# Email
+# =========================================
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = CONFIG.EMAIL_HOST
+EMAIL_PORT = CONFIG.EMAIL_PORT
+EMAIL_USE_TLS = CONFIG.EMAIL_USE_TLS
+EMAIL_HOST_USER = CONFIG.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = CONFIG.EMAIL_HOST_PASSWORD
+
+
+# =========================================
+# Simple JWT
+# =========================================
+SIMPLE_JWT = {
+    # Basic
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    # Lifetime
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=CONFIG.JWT_ACCESS_TOKEN_LIFETIME_MINUTES),
+    "REFRESH_TOKEN_LIFETIME": timedelta(hours=CONFIG.JWT_REFRESH_TOKEN_LIFETIME_HOURS),
+    # Properties
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+    # Security
+    "SIGNING_KEY": SECRET_KEY,
+    "ALGORITHM": "HS256",
+}
+
+
+
+
+

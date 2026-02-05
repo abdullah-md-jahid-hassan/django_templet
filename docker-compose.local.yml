@@ -4,15 +4,8 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    image: softvence/django_template:latest
     container_name: dt_web
-    command: >
-      gunicorn kilianRohde.wsgi:application
-      --bind 0.0.0.0:8000
-      --workers 2
-      --threads 2
-      --timeout 60
-      --reload
+    command: python manage.py runserver 0.0.0.0:8000
     env_file:
       - .env
     environment:
@@ -24,11 +17,15 @@ services:
     depends_on:
       - db
       - redis
+    networks:
+      - dt_network
 
   celery_worker:
-    image: softvence/django_template:latest
     container_name: dt_celery_worker
-    command: python -m celery -A kilianRohde.celery worker -l info
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: python -m celery -A my_django.celery worker -l info
     working_dir: /app
     env_file:
       - .env
@@ -40,11 +37,15 @@ services:
     depends_on:
       - db
       - redis
+    networks:
+      - dt_network
 
   celery_beat:
-    image: softvence/django_template:latest
     container_name: dt_celery_beat
-    command: python -m celery -A kilianRohde.celery beat -l info
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: python -m celery -A my_django.celery beat -l info
     working_dir: /app
     env_file:
       - .env
@@ -56,6 +57,8 @@ services:
     depends_on:
       - db
       - redis
+    networks:
+      - dt_network
 
   db:
     image: postgres:15-alpine
@@ -70,12 +73,20 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - dt_network
 
   redis:
     image: redis:7-alpine
     container_name: dt_redis
     ports:
       - "6379:6379"
+    networks:
+      - dt_network
+
+networks:
+  dt_network:
+    driver: bridge
 
 volumes:
   postgres_data:

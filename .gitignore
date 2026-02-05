@@ -50,3 +50,7 @@ docker-compose.override.yml
 *.pem
 *.key
 secrets/
+
+# ===== Celery =====
+celerybeat-schedule
+celerybeat-schedule.db
