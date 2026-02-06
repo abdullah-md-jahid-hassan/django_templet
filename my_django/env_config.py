@@ -6,11 +6,10 @@ class EnvConfig:
     SECRET_KEY = config('SECRET_KEY', cast=str)
     ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=str).split(',')
 
-    # Login
+    # Throttles
     LOGIN_THROTTLE_RATE_PER_MINUTE = config('LOGIN_THROTTLE_RATE_PER_MINUTE', default=5, cast=int)
-
-    # Register
     REGISTER_THROTTLE_RATE_PER_MINUTE = config('REGISTER_THROTTLE_RATE_PER_MINUTE', default=3, cast=int)
+    CHANGE_PASSWORD_THROTTLE_RATE_PER_MINUTE = config('CHANGE_PASSWORD_THROTTLE_RATE_PER_MINUTE', default=2, cast=int)
 
     # Tasted Origin Settings
     CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=True, cast=bool)
@@ -42,3 +41,10 @@ class EnvConfig:
     # Celery
     CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://redis:6379/0', cast=str)
     CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://redis:6379/0', cast=str)
+
+    # Email settings
+    EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com", cast=str)
+    EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+    EMAIL_HOST_USER = config("EMAIL_HOST_USER", cast=str)
+    EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", cast=str)
+    EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)

@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework import status, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
 from utils.response import error_response, success_response
-from authentication.utils.password import change_password
+from authentication.services.password import change_password
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.throttling import AnonRateThrottle
@@ -17,7 +17,7 @@ CONFIG = settings.CONFIG
 
 # Register endpoint
 class RegisterThrottle(AnonRateThrottle):
-    rate = f"{CONFIG.REGISTER_THROTTLE_RATE_PER_MINUTE}/min"
+    scope = "register"
 class ResisterView(APIView):
     throttle_classes = [RegisterThrottle]
     permission_classes = [permissions.AllowAny]
@@ -56,7 +56,7 @@ class ResisterView(APIView):
 
 # Strict throttle for login
 class LoginThrottle(AnonRateThrottle):
-    rate = f"{CONFIG.LOGIN_THROTTLE_RATE_PER_MINUTE}/min"
+    scope = "login"
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
     throttle_classes = [LoginThrottle]
@@ -105,12 +105,13 @@ class VerifyUserView(APIView):
             status_code=status.HTTP_200_OK,
         )
 
+class ChangePasswordThrottle(AnonRateThrottle):
+    scope = "change_password"
 class ChangePasswordView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
+    throttle_classes = [ChangePasswordThrottle]
     def post(self, request):
         user = request.user
-
         old_password = request.data["old_password"]
         new_password = request.data["new_password"]
         try:
@@ -129,3 +130,5 @@ class ChangePasswordView(APIView):
                 errors=e,
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
+
+

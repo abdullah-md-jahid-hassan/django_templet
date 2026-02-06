@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     # Self Define
     'authentication',
     'core',
+    'emails',
 ]
 
 MIDDLEWARE = [
@@ -108,6 +109,9 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "20/min",
         "user": "200/min",
+        "login": f"{CONFIG.LOGIN_THROTTLE_RATE_PER_MINUTE}/min",
+        "register": f"{CONFIG.REGISTER_THROTTLE_RATE_PER_MINUTE}/min",
+        "change_password": f"{CONFIG.CHANGE_PASSWORD_THROTTLE_RATE_PER_MINUTE}/min",
     },
 }
 
@@ -219,9 +223,9 @@ CELERY_TIMEZONE = 'UTC'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = CONFIG.EMAIL_HOST
 EMAIL_PORT = CONFIG.EMAIL_PORT
-EMAIL_USE_TLS = CONFIG.EMAIL_USE_TLS
 EMAIL_HOST_USER = CONFIG.EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = CONFIG.EMAIL_HOST_PASSWORD
+EMAIL_USE_TLS = CONFIG.EMAIL_USE_TLS
 
 
 # =========================================

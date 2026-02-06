@@ -1,11 +1,9 @@
-from re import DEBUG
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
-from my_django.settings import DEBUG
+from django.conf import settings
+import traceback
 from rest_framework.exceptions import APIException
 from django.core.exceptions import ValidationError as DjangoValidationError
-from utils.debug import request_error
 
 
 def _serialize_exception(exc: Exception):
@@ -27,7 +25,11 @@ def _serialize_exception(exc: Exception):
     return str(exc)
 
 
-def success_response(message="Success", data=None, status_code=status.HTTP_200_OK):
+def success_response(
+    message="Success", 
+    data=None, 
+    status_code=status.HTTP_200_OK
+):
     return Response(
         {"success": True, "message": message, "data": data}, status=status_code
     )
@@ -39,7 +41,7 @@ def error_response(
     errors: Exception | None = None,
     data=None,
     status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-    request: Request | None = None,
+    request=None,
 ):
     response = {
         "success": False,
@@ -49,7 +51,15 @@ def error_response(
     }
 
     # DEBUG MODE: rich diagnostics
-    if DEBUG and errors is not None:
-        response["debug"] = request_error(errors=errors, request=request)
+    if settings.DEBUG and errors is not None:
+        if request is not None:
+            response["path"] = request.path
+            response["method"] = request.method
+            response["payload"] = request.params if request.method == "GET" else request.data
+        response["debug"] = {
+            "exception": errors.__class__.__name__,
+            # "error": _serialize_exception(errors),
+            "traceback": traceback.format_exc().splitlines(),
+        }
 
     return Response(response, status=status_code)
