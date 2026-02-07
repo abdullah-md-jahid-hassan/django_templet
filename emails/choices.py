@@ -8,3 +8,13 @@ class EmailStatus(TextChoices):
     SENT = 'sent', 'SENT'
     FAILED = 'failed', 'FAILED'
     SCHEDULED = 'scheduled', 'SCHEDULED'
+
+class EmailPurpose(TextChoices):
+    OTHERS = 'others', 'OTHERS'
+    WELCOME = 'welcome', 'WELCOME'
+    PASSWORD_RESET = 'password_reset', 'PASSWORD_RESET'
+    REGISTRATION = 'registration', 'REGISTRATION'
+    DISCOUNT_CODE = 'discount_code', 'DISCOUNT_CODE'
+    OTP = 'otp', 'OTP'
+
+
