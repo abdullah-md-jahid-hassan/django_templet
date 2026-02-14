@@ -1,7 +1,8 @@
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.db import transaction
-from emails.models import EmailLog, EmailLogStatusChoices
+from emails.models import EmailLog
+from emails.choices import EmailStatus
 from emails.serializers import (
     EmailLogSerializer, 
 )
@@ -73,7 +74,7 @@ def send_email_core(
         email.send()
 
         EmailLog.objects.filter(id=email_log.id).update(
-            status=EmailLogStatusChoices.SENT
+            status=EmailStatus.SENT
         )
 
     transaction.on_commit(_send)

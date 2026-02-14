@@ -1,4 +1,4 @@
-from core.health import (
+from core.healths import (
     check_email_service,
     check_database,
 )
@@ -8,6 +8,8 @@ def health_report():
         check_email_service(),
         check_database(),
     ]
+
+    # print(f"Health Check Report>>>>>: {health}")
 
     success_count = 0
     fail_count = 0

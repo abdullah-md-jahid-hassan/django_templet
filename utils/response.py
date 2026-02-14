@@ -59,7 +59,7 @@ def error_response(
         response["debug"] = {
             "exception": errors.__class__.__name__,
             # "error": _serialize_exception(errors),
-            "traceback": traceback.format_exc().splitlines(),
+            "traceback": traceback.format_exc(),
         }
 
     return Response(response, status=status_code)
