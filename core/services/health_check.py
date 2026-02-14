@@ -2,6 +2,7 @@ from core.healths import (
     check_email_service,
     check_database,
 )
+from django.conf import settings
 
 def health_report():
     health = [
@@ -9,7 +10,7 @@ def health_report():
         check_database(),
     ]
 
-    # print(f"Health Check Report>>>>>: {health}")
+    print(f"Health Check Report>>>>>: {health}")
 
     success_count = 0
     fail_count = 0
@@ -20,6 +21,7 @@ def health_report():
             fail_count += 1
 
     return {
+        "debug_status": settings.DEBUG,
         "success_count": success_count,
         "fail_count": fail_count,
         "services": health,

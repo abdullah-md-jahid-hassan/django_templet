@@ -195,6 +195,11 @@
 
     <div class="summary">
         <div class="summary-card">
+            <div class="summary-label">DeBug</div>
+            <div class="summary-value">{{ debug_status|yesno:"ON,OFF" }}</div>
+        </div>
+
+        <div class="summary-card">
             <div class="summary-label">Total Services</div>
             <div class="summary-value">{{ services|length }}</div>
         </div>
@@ -235,22 +240,24 @@
                 <span class="status fail">FAIL</span>
             {% endif %}
         </div>
-
+        
         <div class="card-body">
             <div class="message">{{ r.message }}</div>
 
-            {% if debug and r.errors %}
+            {% if debug_status and r.errors %}
                 <div class="section">
                     <div class="section-title">Error</div>
-                    <div class="error-box">{{ r.errors }}</div>
+                    <pre class="error-box">{{ r.errors }}</pre>
                 </div>
             {% endif %}
 
-            {% if debug and r.traceback %}
+            {% if debug_status and r.traceback %}
                 <div class="section">
                     <div class="section-title">Traceback</div>
-                    <div class="error-box">{{ r.traceback|join:"
-" }}</div>
+                    <pre class="error-box">
+                        <p>{% for line in r.traceback %}{{ line }} <br>{% endfor %}</p>
+                    </pre>
+
                 </div>
             {% endif %}
         </div>

@@ -3,7 +3,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: docker/DockerFile
+      dockerfile: docker/Dockerfile
     container_name: dt_web
     command: python manage.py runserver 0.0.0.0:8000
     env_file:
@@ -24,7 +24,7 @@ services:
     container_name: dt_celery_worker
     build:
       context: .
-      dockerfile: docker/DockerFile
+      dockerfile: docker/Dockerfile
     command: python -m celery -A my_django.celery worker -l info
     working_dir: /app
     env_file:
@@ -44,7 +44,7 @@ services:
     container_name: dt_celery_beat
     build:
       context: .
-      dockerfile: docker/DockerFile
+      dockerfile: docker/Dockerfile
     command: python -m celery -A my_django.celery beat -l info
     working_dir: /app
     env_file:
