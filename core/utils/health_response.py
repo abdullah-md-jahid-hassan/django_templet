@@ -1,3 +1,4 @@
+import traceback
 
 
 def health_ok_response(
@@ -14,13 +15,12 @@ def health_ok_response(
 def health_error_response(
     name='Unknown',
     message="Health Error",
-    errors=None,
-    traceback=None,
+    errors: Exception | None = None,
 ):
     return {
         "success": False,
         "name": name,
         "message": message,
         "errors": errors,
-        "traceback": traceback.splitlines(),
+        "traceback": traceback.format_exc().splitlines() if errors else None,
     }

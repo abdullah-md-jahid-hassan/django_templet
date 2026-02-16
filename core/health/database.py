@@ -1,16 +1,43 @@
 from core.utils.health_response import health_ok_response, health_error_response
+from django.db import connection
+from django.conf import settings
 import traceback
-
 
 def check_database():
     try:
-        from django.db import connection
-        connection.cursor()
-        return health_ok_response(name="Database", message="Health OK")
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1;")
+            cursor.fetchone()
+
+        return health_ok_response(
+            name="Database",
+            message="Health OK",
+        )
+
     except Exception as e:
         return health_error_response(
-            name="Database", 
+            name="Database",
             message="Health Error",
-            errors=str(e),
-            traceback=traceback.format_exc(),
+            errors=e,
         )
+
+
+def check_redis():
+    try:
+        import redis
+
+        client = redis.Redis.from_url(settings.REDIS_URL)
+        client.ping()
+
+        return health_ok_response(
+            name="Redis",
+            message="Health OK"
+        )
+
+    except Exception as e:
+        return health_error_response(
+            name="Redis",
+            message="Health Error",
+            errors=e,
+        )
+

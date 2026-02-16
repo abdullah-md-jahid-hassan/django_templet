@@ -1,272 +1,348 @@
+<!-- Input data:
+    {
+        "debug_status": true,
+        "services": [
+            {
+                "name": "Database",
+                "success": true,
+                "message": "Database connection successful.",
+                "errors": null,
+                "traceback": null
+            },
+            {
+                "name": "Cache",
+                "success": false,
+                "message": "Cache server not responding.",
+                "errors": "ConnectionError: Failed to connect to cache server at
+    } -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>System Health</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>System Health</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <style>
-        :root {
-            --bg: #020617;
-            --card: #0f172a;
-            --border: #1e293b;
-            --text: #e5e7eb;
-            --muted: #94a3b8;
-            --ok: #22c55e;
-            --fail: #ef4444;
-            --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
-        }
+<style>
+:root {
+    --bg: #020617;
+    --card: #0f172a;
+    --border: #1e293b;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --ok: #22c55e;
+    --fail: #ef4444;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
 
-        * { box-sizing: border-box; }
+* { box-sizing: border-box; }
 
-        body {
-            margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-        }
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
 
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 0 16px;
-        }
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 16px;
+}
 
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
+h1 {
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
 
-        .subtitle {
-            color: var(--muted);
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-        }
+.subtitle {
+    color: var(--muted);
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
 
-        /* ===== Summary ===== */
+/* ===== Summary ===== */
 
-        .summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 12px;
-            margin-bottom: 22px;
-        }
+.summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 22px;
+}
 
-        .summary-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 14px 16px;
-        }
+.summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+}
 
-        .summary-label {
-            font-size: 0.7rem;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
+.summary-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
 
-        .summary-value {
-            margin-top: 6px;
-            font-size: 1.4rem;
-            font-weight: 600;
-        }
+.summary-value {
+    margin-top: 6px;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
 
-        .summary-value.ok { color: var(--ok); }
-        .summary-value.fail { color: var(--fail); }
+.summary-value.ok { color: var(--ok); }
+.summary-value.fail { color: var(--fail); }
 
-        /* ===== Cards ===== */
+/* ===== Cards ===== */
 
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            margin-bottom: 14px;
-            overflow: hidden;
-        }
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 14px;
+    overflow: hidden;
+}
 
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 16px;
-            cursor: pointer;
-        }
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    cursor: pointer;
+}
 
-        .card-header:hover {
-            background: rgba(255,255,255,0.03);
-        }
+.card-header:hover {
+    background: rgba(255,255,255,0.03);
+}
 
-        .card-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+.card-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
-        .chevron {
-            transition: transform 0.2s ease;
-            color: var(--muted);
-        }
+.chevron {
+    transition: transform 0.2s ease;
+    color: var(--muted);
+}
 
-        .card.open .chevron {
-            transform: rotate(90deg);
-        }
+.card.open .chevron {
+    transform: rotate(90deg);
+}
 
-        .service-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
+.service-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
 
-        .status {
-            padding: 4px 10px;
-            border-radius: 999px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
+.status {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
 
-        .status.ok {
-            background: rgba(34,197,94,0.15);
-            color: var(--ok);
-        }
+.status.ok {
+    background: rgba(34,197,94,0.15);
+    color: var(--ok);
+}
 
-        .status.fail {
-            background: rgba(239,68,68,0.15);
-            color: var(--fail);
-        }
+.status.fail {
+    background: rgba(239,68,68,0.15);
+    color: var(--fail);
+}
 
-        .card-body {
-            display: none;
-            padding: 14px 16px 18px;
-            border-top: 1px solid var(--border);
-        }
+.card-body {
+    display: none;
+    padding: 14px 16px 18px;
+    border-top: 1px solid var(--border);
+}
 
-        .card.open .card-body {
-            display: block;
-        }
+.card.open .card-body {
+    display: block;
+}
 
-        .message {
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
+.message {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
 
-        .section {
-            margin-top: 12px;
-        }
+/* ===== Error Section ===== */
 
-        .section-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--muted);
-            margin-bottom: 6px;
-        }
+.section {
+    margin-top: 14px;
+}
 
-        .error-box {
-            background: rgba(239,68,68,0.08);
-            border: 1px solid rgba(239,68,68,0.25);
-            border-radius: 8px;
-            padding: 10px;
-            font-family: var(--mono);
-            font-size: 0.8rem;
-            white-space: pre-wrap;
-            color: #fecaca;
-        }
+.section-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
 
-        footer {
-            margin-top: 16px;
-            font-size: 0.75rem;
-            color: var(--muted);
-            text-align: right;
-        }
-    </style>
+.copy-wrapper {
+    position: relative;
+}
 
-    <script>
-        function toggleCard(card) {
-            card.classList.toggle('open');
-        }
-    </script>
+.copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.copy-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--text);
+}
+
+.copy-btn.copied {
+    color: var(--ok);
+    border-color: var(--ok);
+}
+
+.error-box {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+    color: #fecaca;
+    overflow-x: auto;
+}
+
+footer {
+    margin-top: 16px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: right;
+}
+</style>
+
+<script>
+function toggleCard(header) {
+    const card = header.parentElement;
+    card.classList.toggle("open");
+}
+
+function copyContent(button, id) {
+    const text = document.getElementById(id).innerText;
+
+    navigator.clipboard.writeText(text).then(() => {
+        button.classList.add("copied");
+        button.innerText = "Copied ✓";
+
+        setTimeout(() => {
+            button.classList.remove("copied");
+            button.innerText = "Copy";
+        }, 1500);
+    });
+}
+</script>
+
 </head>
-
 <body>
 <div class="container">
-    <h1>System Health</h1>
-    <div class="subtitle">Runtime diagnostics & service availability</div>
+<h1>System Health</h1>
+<div class="subtitle">Runtime diagnostics & service availability</div>
 
-    <div class="summary">
-        <div class="summary-card">
-            <div class="summary-label">DeBug</div>
-            <div class="summary-value">{{ debug_status|yesno:"ON,OFF" }}</div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-label">Total Services</div>
-            <div class="summary-value">{{ services|length }}</div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-label">Success</div>
-            <div class="summary-value ok">{{ success_count }}</div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-label">Fail</div>
-            <div class="summary-value fail">{{ fail_count }}</div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-label">Success Rate</div>
-            <div class="summary-value ok">
-                {% if services|length > 0 %}
-                    {% widthratio success_count services|length 100 %}%
-                {% else %}
-                    0%
-                {% endif %}
-            </div>
-        </div>
+<div class="summary">
+    <div class="summary-card">
+        <div class="summary-label">Debug</div>
+        <div class="summary-value">{{ debug_status|yesno:"ON,OFF" }}</div>
     </div>
 
-    {% for r in services %}
-    <div class="card" onclick="toggleCard(this)">
-        <div class="card-header">
-            <div class="card-title">
-                <span class="chevron">▶</span>
-                <span class="service-name">{{ r.name }}</span>
-            </div>
+    <div class="summary-card">
+        <div class="summary-label">Total Services</div>
+        <div class="summary-value">{{ services|length }}</div>
+    </div>
 
-            {% if r.success %}
-                <span class="status ok">OK</span>
+    <div class="summary-card">
+        <div class="summary-label">Success</div>
+        <div class="summary-value ok">{{ success_count }}</div>
+    </div>
+
+    <div class="summary-card">
+        <div class="summary-label">Fail</div>
+        <div class="summary-value fail">{{ fail_count }}</div>
+    </div>
+
+    <div class="summary-card">
+        <div class="summary-label">Success Rate</div>
+        <div class="summary-value ok">
+            {% if services|length > 0 %}
+                {% widthratio success_count services|length 100 %}%
             {% else %}
-                <span class="status fail">FAIL</span>
-            {% endif %}
-        </div>
-        
-        <div class="card-body">
-            <div class="message">{{ r.message }}</div>
-
-            {% if debug_status and r.errors %}
-                <div class="section">
-                    <div class="section-title">Error</div>
-                    <pre class="error-box">{{ r.errors }}</pre>
-                </div>
-            {% endif %}
-
-            {% if debug_status and r.traceback %}
-                <div class="section">
-                    <div class="section-title">Traceback</div>
-                    <pre class="error-box">
-                        <p>{% for line in r.traceback %}{{ line }} <br>{% endfor %}</p>
-                    </pre>
-
-                </div>
+                0%
             {% endif %}
         </div>
     </div>
-    {% endfor %}
+</div>
 
-    <footer>
-        {% if debug %}DEBUG mode{% else %}Production mode{% endif %}
-    </footer>
+{% for r in services %}
+<div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+        <div class="card-title">
+            <span class="chevron">▶</span>
+            <span class="service-name">{{ r.name }}</span>
+        </div>
+
+        {% if r.success %}
+            <span class="status ok">OK</span>
+        {% else %}
+            <span class="status fail">FAIL</span>
+        {% endif %}
+    </div>
+
+    <div class="card-body">
+        <div class="message">{{ r.message }}</div>
+
+        {% if debug_status and r.errors %}
+        <div class="section">
+            <div class="section-title">Error</div>
+            <div class="copy-wrapper">
+                <button class="copy-btn"
+                        onclick="copyContent(this, 'error-{{ forloop.counter }}')">
+                    Copy
+                </button>
+                <pre id="error-{{ forloop.counter }}" class="error-box">{{ r.errors }}</pre>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if debug_status and r.traceback %}
+        <div class="section">
+            <div class="section-title">Traceback</div>
+            <div class="copy-wrapper">
+                <button class="copy-btn"
+                        onclick="copyContent(this, 'trace-{{ forloop.counter }}')">
+                    Copy
+                </button>
+                <pre id="trace-{{ forloop.counter }}" class="error-box">
+                    <p>{% for line in r.traceback %}{{ line }}<br>{% endfor %}</p>
+                </pre>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+<footer>
+    {% if debug_status %}DEBUG mode{% else %}Production mode{% endif %}
+</footer>
+
 </div>
 </body>
 </html>

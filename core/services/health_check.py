@@ -1,13 +1,20 @@
-from core.healths import (
-    check_email_service,
-    check_database,
-)
+from core.health import *
+# (
+#     check_email_service,
+#     check_database,
+#     check_redis,
+#     check_celery_worker,
+#     check_celery_beat,
+# )
 from django.conf import settings
 
 def health_report():
     health = [
         check_email_service(),
         check_database(),
+        check_redis(),
+        check_celery_worker(),
+        check_celery_beat(),
     ]
 
     print(f"Health Check Report>>>>>: {health}")
