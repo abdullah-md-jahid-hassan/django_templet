@@ -14,6 +14,12 @@ from pathlib import Path
 from my_django.env_config import EnvConfig
 from datetime import timedelta
 
+#==========================================================
+# Celery Beat Schedule
+#==========================================================
+from .configs.celery_schedules import CELERY_BEAT_SCHEDULE
+
+
 
 # =========================================
 # Default User Model
