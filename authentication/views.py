@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework import status, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
-from utils.response import error_response, success_response
+from core.utils.response import error_response, success_response
 from authentication.services.password import change_password
 
 from rest_framework_simplejwt.views import TokenObtainPairView

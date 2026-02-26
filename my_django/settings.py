@@ -84,7 +84,8 @@ INSTALLED_APPS = [
     # Self Define
     'authentication',
     'core',
-    'emails',
+    'email',
+    'otp',
 ]
 
 MIDDLEWARE = [
@@ -118,6 +119,7 @@ REST_FRAMEWORK = {
         "login": f"{CONFIG.LOGIN_THROTTLE_RATE_PER_MINUTE}/min",
         "register": f"{CONFIG.REGISTER_THROTTLE_RATE_PER_MINUTE}/min",
         "change_password": f"{CONFIG.CHANGE_PASSWORD_THROTTLE_RATE_PER_MINUTE}/min",
+        "get_otp": f"{CONFIG.GET_OTP_THROTTLE_RATE_PER_DAY}/day",
     },
 }
 

@@ -1,4 +1,3 @@
-import hashlib
 import uuid
 import hmac
 from typing import Optional
@@ -8,6 +7,10 @@ from django.conf import settings
 from django.utils.crypto import get_random_string
 
 from core.cache.redis_client import redis_client
+from core.utils.generators import random_string
+from otp.enums import OtpChannel
+from otp.choices import OtpPurpose
+from email.tasks import send_email_task
 
 
 class OTPService:
@@ -29,27 +32,27 @@ class OTPService:
         """Return SHA256 hash of user identifier."""
         return hashlib.sha256(user.encode()).hexdigest()
 
-    @classmethod
-    def _otp_key(cls, purpose: str, user_hash: str, otp_id: str) -> str:
-        """Redis key for a specific OTP."""
-        return f"otp:{purpose}:{user_hash}:{otp_id}"
-
-    @classmethod
-    def _index_key(cls, purpose: str, user_hash: str) -> str:
-        """Redis key storing active OTP ids."""
-        return f"otp:index:{purpose}:{user_hash}"
-
     @staticmethod
     def _hash_otp(otp: str) -> str:
         """Hash OTP before storing."""
         return hashlib.sha256(otp.encode()).hexdigest()
+
+    @classmethod
+    def _otp_key(cls, purpose: OtpPurpose, user_hash: str, otp_id: str) -> str:
+        """Redis key for a specific OTP."""
+        return f"otp:{purpose}:{user_hash}:{otp_id}"
+
+    @classmethod
+    def _index_key(cls, purpose: OtpPurpose, user_hash: str) -> str:
+        """Redis key storing active OTP ids."""
+        return f"otp:index:{purpose}:{user_hash}"
 
     # ---------------------------------------------------------
     # PUBLIC API
     # ---------------------------------------------------------
 
     @classmethod
-    def generate(cls, user: str, purpose: str) -> str:
+    def generate(cls, user: str, purpose: OtpPurpose) -> str:
         """
         Generate and store a new OTP.
 
@@ -59,7 +62,11 @@ class OTPService:
         user_hash = cls._user_hash(user)
         index_key = cls._index_key(purpose, user_hash)
 
-        otp = get_random_string(6, allowed_chars="0123456789")
+        otp = random_string(
+            length=6,
+            allow_numbers=True,
+            allow_capital=True
+        )
         otp_hash = cls._hash_otp(otp)
         otp_id = str(uuid.uuid4())
 
@@ -82,7 +89,7 @@ class OTPService:
         return otp
 
     @classmethod
-    def verify(cls, user: str, purpose: str, submitted_otp: str) -> bool:
+    def verify(cls, user: str, purpose: OtpPurpose, submitted_otp: str) -> bool:
         """
         Verify OTP against active ones.
 
@@ -123,7 +130,7 @@ class OTPService:
         pipe.execute()
 
     @classmethod
-    def _enforce_limit(cls, index_key: str, purpose: str, user_hash: str) -> None:
+    def _enforce_limit(cls, index_key: str, purpose: OtpPurpose, user_hash: str) -> None:
         """Ensure only MAX_ACTIVE_OTPS are stored."""
         length = redis_client.llen(index_key)
 
@@ -137,3 +144,24 @@ class OTPService:
             if oldest_id:
                 otp_key = cls._otp_key(purpose, user_hash, oldest_id)
                 redis_client.delete(otp_key)
+
+    @classmethod
+    def send(cls, user: str, purpose: OtpPurpose, channel: OtpChannel) -> None:
+        """Send OTP to user."""
+        # Get OTP
+        otp = cls.generate(user, purpose)
+        match channel:
+            case OtpChannel.EMAIL:
+                from email.utils.general import send_email_core
+                send_email_task.delay(
+                    subject="OTP",
+                    to_emails=[user],
+                    body=otp,
+                    body_type=EmailBodyType.TEXT,
+                    purpose=purpose,
+                )
+            case OtpChannel.PHONE:
+                RuntimeError ("OTP not implemented for this channel")
+            case _:
+                raise ValueError("Invalid OTP channel")
+    

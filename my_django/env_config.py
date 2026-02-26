@@ -23,6 +23,10 @@ class EnvConfig:
     EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', cast=str)
     EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 
+    # OTP
+    OTP_CHANNEL=config('OTP_CHANNEL', default='email', cast=str)
+    GET_OTP_THROTTLE_RATE_PER_DAY = config('GET_OTP_THROTTLE_RATE_PER_DAY', default=25, cast=int)
+
     # JWT settings
     JWT_ACCESS_TOKEN_LIFETIME_MINUTES = config('JWT_ACCESS_TOKEN_LIFETIME_MINUTES', default=15, cast=int)
     JWT_REFRESH_TOKEN_LIFETIME_HOURS = config('JWT_REFRESH_TOKEN_LIFETIME_HOURS', default=30, cast=int)

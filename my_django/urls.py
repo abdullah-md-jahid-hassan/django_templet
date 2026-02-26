@@ -24,4 +24,5 @@ urlpatterns = [
     path('', HealthReportView.as_view(), name='health_report'),
     path('admin/', admin.site.urls),
     path('auth/', include('authentication.urls')),
+    path('otp/', include('otp.urls')),
 ]

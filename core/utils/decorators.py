@@ -1,6 +1,6 @@
 from functools import wraps
 from rest_framework import status
-from utils.response import error_response
+from core.utils.response import error_response
 
 
 def admin_required(view_func):
