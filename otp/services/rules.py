@@ -1,4 +1,4 @@
-from otp.choices import OtpPurpose
+from otp.choices import OtpPurpose, OtpChannel
 from dataclasses import dataclass
 from django.conf import settings
 

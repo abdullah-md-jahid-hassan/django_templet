@@ -6,17 +6,35 @@ class EnvConfig:
     SECRET_KEY = config('SECRET_KEY', cast=str)
     ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=str).split(',')
 
-    # Throttles
+    # CORS Settings
+    CORS_ALLOW_CREDENTIALS = config('CORS_ALLOW_CREDENTIALS', default=True, cast=bool)
+    CORS_ALLOW_ALL_ORIGINS  = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
+    if not CORS_ALLOW_ALL_ORIGINS:
+        CORS_ALLOWED_ORIGINS = [origin for origin in (config('CORS_ALLOWED_ORIGINS', default='', cast=str).split(",")) if origin]
+        CORS_ALLOWED_ORIGIN_REGEXES = [origin for origin in (config('CORS_ALLOWED_ORIGIN_REGEXES', default='', cast=str).split(",")) if origin]
+    CSRF_TRUSTED_ORIGINS = [origin for origin in (config("CSRF_TRUSTED_ORIGINS", default="", cast=str).split(",")) if origin]
+    CORS_ALLOWED_METHODS = [method for method in (config('CORS_ALLOWED_METHODS', default='', cast=str).split(",")) if method]
+    if not CORS_ALLOWED_METHODS:
+        CORS_ALLOWED_METHODS = [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "OPTIONS",
+        ]
+    # CORS_ALLOW_HEADERS = config('CORS_ALLOWED_ORIGINS', default='', cast=str).split(",")
+    # if not CORS_ALLOW_HEADERS:
+    #     CORS_ALLOW_HEADERS = [
+    #         "authorization",
+    #         "content-type",
+    #     ]
+
+    # Throttles Settings
     LOGIN_THROTTLE_RATE_PER_MINUTE = config('LOGIN_THROTTLE_RATE_PER_MINUTE', default=5, cast=int)
     REGISTER_THROTTLE_RATE_PER_MINUTE = config('REGISTER_THROTTLE_RATE_PER_MINUTE', default=3, cast=int)
     CHANGE_PASSWORD_THROTTLE_RATE_PER_MINUTE = config('CHANGE_PASSWORD_THROTTLE_RATE_PER_MINUTE', default=2, cast=int)
 
-    # Tasted Origin Settings
-    CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=True, cast=bool)
-    CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='', cast=str).split(',')
-    CORS_ALLOW_CREDENTIALS = config('CORS_ALLOW_CREDENTIALS', default=True, cast=bool)
-
-    # Email settings
+    # Email Settings
     EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com', cast=str)
     EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
     EMAIL_HOST_USER = config('EMAIL_HOST_USER', cast=str)

@@ -41,6 +41,24 @@ DEBUG = CONFIG.DEBUG
 ALLOWED_HOSTS = CONFIG.ALLOWED_HOSTS if not DEBUG else ['*']
 
 
+# =========
+# CORS
+# =========
+CORS_ALLOW_CREDENTIALS = CONFIG.CORS_ALLOW_CREDENTIALS
+CORS_ALLOW_ALL_ORIGINS  = CONFIG.CORS_ALLOW_ALL_ORIGINS
+if not CORS_ALLOW_ALL_ORIGINS:
+    CORS_ALLOWED_ORIGINS = CONFIG.CORS_ALLOWED_ORIGINS
+    CORS_ALLOWED_ORIGIN_REGEXES = CONFIG.CORS_ALLOWED_ORIGIN_REGEXES
+CSRF_TRUSTED_ORIGINS = CONFIG.CSRF_TRUSTED_ORIGINS
+CORS_ALLOWED_METHODS = CONFIG.CORS_ALLOWED_METHODS
+# CORS_ALLOW_HEADERS = config('CORS_ALLOWED_ORIGINS', default='', cast=str).split(",")
+# if not CORS_ALLOW_HEADERS:
+#     CORS_ALLOW_HEADERS = [
+#         "authorization",
+#         "content-type",
+#     ]
+
+
 # =========================================
 # Base Config
 # =========================================
@@ -84,7 +102,7 @@ INSTALLED_APPS = [
     # Self Define
     'authentication',
     'core',
-    'email',
+    'emails',
     'otp',
 ]
 

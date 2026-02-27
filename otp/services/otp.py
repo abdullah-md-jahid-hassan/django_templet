@@ -8,9 +8,10 @@ from django.utils.crypto import get_random_string
 
 from core.cache.redis_client import redis_client
 from core.utils.generators import random_string
-from otp.enums import OtpChannel
-from otp.choices import OtpPurpose
-from email.tasks import send_email_task
+from otp.choices import OtpPurpose, OtpChannel
+from emails.tasks import send_email_task
+from emails.choices import EmailBodyType
+import hashlib
 
 
 class OTPService:
@@ -152,7 +153,7 @@ class OTPService:
         otp = cls.generate(user, purpose)
         match channel:
             case OtpChannel.EMAIL:
-                from email.utils.general import send_email_core
+                from emails.utils.general import send_email_core
                 send_email_task.delay(
                     subject="OTP",
                     to_emails=[user],

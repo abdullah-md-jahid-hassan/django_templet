@@ -1,15 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from core.utils.response import error_response
-from core.choices import OtpPurpose
+from otp.choices import OtpPurpose
 from rest_framework import status
 from core.utils.validator import validate_phone
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from otp.utils import get_otp_rules
-from otp.enums import OtpChannel
+from otp.services.rules import get_otp_rules
+from otp.choices import OtpChannel
 from otp.services import OTPService
 from rest_framework.throttling import AnonRateThrottle
+from core.utils.response import success_response
 
 class GetOtpRateThrottle(AnonRateThrottle):
     scope = 'get_otp'
@@ -60,7 +61,7 @@ class GetOtpView(APIView):
 
         # Get otp channel
         otp_channel = otp_rules.channel
-        if otp_channel == OtpChannel.all:
+        if otp_channel == OtpChannel.ALL:
             otp_channel = request.data.get('otp_channel', None)
         if not otp_channel:
             return error_response(
