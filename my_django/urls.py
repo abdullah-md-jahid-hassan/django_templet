@@ -22,6 +22,7 @@ from core.views import HealthReportView
 
 urlpatterns = [
     path('', HealthReportView.as_view(), name='health_report'),
+    path('test/', include('my_test.urls')),
     path('admin/', admin.site.urls),
     path('auth/', include('authentication.urls')),
     path('otp/', include('otp.urls')),

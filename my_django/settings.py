@@ -104,6 +104,7 @@ INSTALLED_APPS = [
     'core',
     'emails',
     'otp',
+    'my_test',
 ]
 
 MIDDLEWARE = [

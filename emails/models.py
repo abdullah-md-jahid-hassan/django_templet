@@ -6,7 +6,7 @@ from emails.choices import (
 )
 
 class EmailLog(models.Model):
-    to_email = models.TextField()
+    to_emails = models.TextField()
     bcc = models.TextField(blank=True, null=True)
     from_email = models.EmailField()
 

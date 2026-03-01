@@ -11,6 +11,7 @@ from core.utils.generators import random_string
 from otp.choices import OtpPurpose, OtpChannel
 from emails.tasks import send_email_task
 from emails.choices import EmailBodyType
+from django.template.loader import render_to_string
 import hashlib
 
 
@@ -157,8 +158,14 @@ class OTPService:
                 send_email_task.delay(
                     subject="OTP",
                     to_emails=[user],
-                    body=otp,
-                    body_type=EmailBodyType.TEXT,
+                    body=render_to_string(
+                        "otp_body.html", 
+                        {
+                            "otp": otp,
+                            "purpose": purpose,
+                        }
+                    ),
+                    body_type=EmailBodyType.HTML,
                     purpose=purpose,
                 )
             case OtpChannel.PHONE:
