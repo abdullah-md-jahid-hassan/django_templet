@@ -12,7 +12,10 @@ from otp.choices import OtpPurpose, OtpChannel
 from emails.tasks import send_email_task
 from emails.choices import EmailBodyType
 from django.template.loader import render_to_string
+from django.conf import settings
 import hashlib
+
+CONFIG = settings.CONFIG
 
 
 class OTPService:
@@ -25,9 +28,9 @@ class OTPService:
     - OTP stored hashed
     """
 
-    OTP_TTL_SECONDS = 300
-    MAX_ACTIVE_OTPS = 5
-    MAX_VERIFY_ATTEMPTS = 5
+    OTP_TTL_SECONDS = CONFIG.OTP_EXPIRY_MINUTES * 60
+    MAX_ACTIVE_OTPS = CONFIG.MAX_ACTIVE_OTPS
+    MAX_VERIFY_ATTEMPTS = CONFIG.MAX_VERIFY_ATTEMPTS
 
     @staticmethod
     def _user_hash(user: str) -> str:
@@ -65,9 +68,9 @@ class OTPService:
         index_key = cls._index_key(purpose, user_hash)
 
         otp = random_string(
-            length=6,
-            allow_numbers=True,
-            allow_capital=True
+            length=CONFIG.OTP_LENGTH,
+            allow_numbers=CONFIG.OTP_ALLOW_NUMBER,
+            allow_capital=CONFIG.OTP_ALLOW_CAPITAL,
         )
         otp_hash = cls._hash_otp(otp)
         otp_id = str(uuid.uuid4())

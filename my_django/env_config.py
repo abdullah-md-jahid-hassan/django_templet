@@ -70,3 +70,14 @@ class EnvConfig:
     EMAIL_HOST_USER = config("EMAIL_HOST_USER", cast=str)
     EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", cast=str)
     EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+
+    # OTP Settings
+    OTP_LENGTH = config("OTP_LENGTH", default=6, cast=int)
+    OTP_EXPIRY_MINUTES = config("OTP_EXPIRY_MINUTES", default=5, cast=int)
+    OTP_ALLOW_NUMBER = config("OTP_ALLOW_NUMBER", default=True, cast=bool)
+    OTP_ALLOW_CAPITAL = config("OTP_ALLOW_CAPITAL", default=False, cast=bool)
+    OTP_ALLOW_SMALL = config("OTP_ALLOW_SMALL", default=False, cast=bool)
+    OTP_ALLOW_SPECIAL = config("OTP_ALLOW_SPECIAL", default=False, cast=bool)
+    MAX_ACTIVE_OTPS = config("MAX_ACTIVE_OTPS", default=5, cast=int)
+    MAX_VERIFY_ATTEMPTS = config("MAX_VERIFY_ATTEMPTS", default=5, cast=int)
+    
