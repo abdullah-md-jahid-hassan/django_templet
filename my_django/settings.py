@@ -115,6 +115,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'logs.middleware.LoggingContextMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -275,5 +276,8 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
 }
 
+
+from logs.logging_config import get_logging_config
+LOGGING = get_logging_config(service_name="my_backend")
 
 

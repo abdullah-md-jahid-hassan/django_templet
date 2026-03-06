@@ -1,0 +1,52 @@
+import uuid
+from django.utils.deprecation import MiddlewareMixin
+from .utils import request_id_var, actor_id_var, actor_type_var, ip_address_var, user_agent_var
+from .constants import ActorType
+
+class LoggingContextMiddleware(MiddlewareMixin):
+    """
+    Middleware to inject request-scoped data into contextvars.
+    This enables anywhere in the application to log the request_id
+    and user transparently.
+    """
+
+    def process_request(self, request):
+        # Generate and store request ID
+        req_id = request.META.get('HTTP_X_REQUEST_ID', str(uuid.uuid4()))
+        request.request_id = req_id # Attach to request object for convenience
+        
+        # Set into context variable
+        request_id_var.set(req_id)
+        
+        # Determine actor
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            actor_id_var.set(str(request.user.id))
+            actor_type_var.set(ActorType.USER)
+        else:
+            actor_id_var.set(None)
+            actor_type_var.set(ActorType.SYSTEM)
+            
+        # Determine IP Address
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        ip_address_var.set(ip)
+        
+        # Determine User Agent
+        user_agent_var.set(request.META.get('HTTP_USER_AGENT')[:255] if request.META.get('HTTP_USER_AGENT') else None)
+
+    def process_response(self, request, response):
+        # We can append the request_id to the response headers for client tracking
+        if hasattr(request, 'request_id'):
+            response['X-Request-ID'] = request.request_id
+            
+        # Clear context vars memory (optional but good practice for async contextvars)
+        request_id_var.set(None)
+        actor_id_var.set(None)
+        actor_type_var.set(None)
+        ip_address_var.set(None)
+        user_agent_var.set(None)
+            
+        return response
