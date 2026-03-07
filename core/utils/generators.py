@@ -1,7 +1,7 @@
 from django.utils.crypto import get_random_string
 from typing import List
 
-# Character pools (constants = faster + cleaner)
+# Character pools
 NUMBERS = "0123456789"
 CAPITALS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 SMALLS = "abcdefghijklmnopqrstuvwxyz"

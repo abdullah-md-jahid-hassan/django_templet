@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, Optional
 
-from .constants import ActorType
+from .choices import ActorType
 from .utils import (
     get_current_request_id,
     get_current_actor_id,

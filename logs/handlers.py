@@ -1,6 +1,5 @@
 import logging
 from django.utils import timezone
-from .models import SystemLog
 
 class DatabaseHandler(logging.Handler):
     """
@@ -8,6 +7,8 @@ class DatabaseHandler(logging.Handler):
     Since this runs in a separate thread via QueueListener, it does not block the main request.
     """
     def emit(self, record):
+        from .models import SystemLog
+        
         try:
             # Prevent infinite recursion if the DB logger itself throws a DB error
             if getattr(record, "name", "").startswith("django.db"):

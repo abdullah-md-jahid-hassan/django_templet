@@ -8,4 +8,4 @@ from .services import (
     log_critical,
 )
 
-from .constants import ActorType
+from .choices import ActorType

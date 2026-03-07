@@ -1,7 +1,13 @@
 import uuid
 from django.utils.deprecation import MiddlewareMixin
-from .utils import request_id_var, actor_id_var, actor_type_var, ip_address_var, user_agent_var
-from .constants import ActorType
+from .utils import (
+    request_id_var, 
+    actor_id_var, 
+    actor_type_var, 
+    ip_address_var, 
+    user_agent_var,
+)
+from .choices import ActorType
 
 class LoggingContextMiddleware(MiddlewareMixin):
     """
@@ -24,7 +30,7 @@ class LoggingContextMiddleware(MiddlewareMixin):
             actor_type_var.set(ActorType.USER)
         else:
             actor_id_var.set(None)
-            actor_type_var.set(ActorType.SYSTEM)
+            actor_type_var.set(ActorType.UNKNOWN)
             
         # Determine IP Address
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -42,7 +48,7 @@ class LoggingContextMiddleware(MiddlewareMixin):
         if hasattr(request, 'request_id'):
             response['X-Request-ID'] = request.request_id
             
-        # Clear context vars memory (optional but good practice for async contextvars)
+        # Clear context vars memory
         request_id_var.set(None)
         actor_id_var.set(None)
         actor_type_var.set(None)
