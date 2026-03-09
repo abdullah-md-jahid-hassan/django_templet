@@ -4,43 +4,15 @@ import atexit
 import logging
 from logging.handlers import QueueHandler, QueueListener
 
-class CustomQueueHandler(QueueHandler):
+class AutoQueueListener(QueueListener):
     """
-    Wraps standard QueueHandler to dynamically resolve and load handler dependencies
-    when Django executes logging dictConfig, preventing initialization order issues.
+    QueueListener that automatically starts its background thread when instantiated.
+    Python 3.12 dictConfig supports QueueListener natively but does not start it automatically.
     """
-    def __init__(self, handlers, respect_handler_level=False, queue_obj=None):
-        if queue_obj is None:
-             queue_obj = queue.Queue(-1) # Infinite queue
-        super().__init__(queue_obj)
-        
-        self.handler_names = handlers
-        self.respect_handler_level = respect_handler_level
-        self._listener = None
-        
-    def _resolve_handlers(self):
-         resolved = []
-         for name in self.handler_names:
-            h = logging._handlers.get(name)
-            if h:
-                resolved.append(h)
-         return resolved
-
-    def emit(self, record):
-        if not self._listener:
-            # Lazy initialize the listener thread to ensure all other formatted are loaded
-            resolved_handlers = self._resolve_handlers()
-            if resolved_handlers:
-                self._listener = QueueListener(
-                    self.queue, 
-                    *resolved_handlers, 
-                    respect_handler_level=self.respect_handler_level
-                )
-                self._listener.start()
-                # Stop listener safely when Django shuts down
-                atexit.register(self._listener.stop) 
-            
-        return super().emit(record)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.start()
+        atexit.register(self.stop)
 
 
 def get_logging_config(service_name="web", logs_dir=None, log_level="INFO"):
@@ -50,7 +22,7 @@ def get_logging_config(service_name="web", logs_dir=None, log_level="INFO"):
     """
     if not logs_dir:
         from django.conf import settings
-        logs_dir = os.path.join(getattr(settings, "BASE_DIR", "."), "logs_output")
+        logs_dir = os.path.join(getattr(settings, "BASE_DIR", "."), "logs/logs_output")
         
     os.makedirs(logs_dir, exist_ok=True)
 
@@ -100,9 +72,10 @@ def get_logging_config(service_name="web", logs_dir=None, log_level="INFO"):
             
             # Non-blocking Async Queue Handler
             "queue_listener": {
-                "class": "logs.logging_config.CustomQueueHandler",
+                "class": "logging.handlers.QueueHandler",
                 "handlers": ["file_app", "file_error", "database", "console"],
                 "respect_handler_level": True,
+                "listener": "logs.logging_config.AutoQueueListener",
             },
         },
         "loggers": {

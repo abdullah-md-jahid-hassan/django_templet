@@ -54,3 +54,8 @@ secrets/
 # ===== Celery =====
 celerybeat-schedule
 celerybeat-schedule.db
+
+
+
+# ======= Logs =======
+logs/logs_output/*

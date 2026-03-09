@@ -17,7 +17,7 @@ def health_report():
         check_celery_beat(),
     ]
 
-    print(f"Health Check Report>>>>>: {health}")
+    # print(f"Health Check Report>>>>>: {health}")
 
     success_count = 0
     fail_count = 0

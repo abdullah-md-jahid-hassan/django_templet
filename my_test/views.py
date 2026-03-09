@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from core.utils.response import success_response, error_response
 from core.utils.general import get_or_400
 from rest_framework import status
@@ -37,7 +37,7 @@ class test1(APIView): # Verify Otp
         )
 
 class test2(APIView): # Test Logs
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     
     def get(self, request):
         from logs.services import (
