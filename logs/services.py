@@ -10,6 +10,7 @@ from .utils import (
     get_current_user_agent,
     extract_caller_info,
     extract_traceback,
+    get_current_request,
 )
 
 logger = logging.getLogger("django.logs.app")
@@ -21,6 +22,7 @@ def _log(
     model_name: Optional[str] = None,
     actor_type: Optional[str] = None,
     actor_id: Optional[str] = None,
+    service_name: Optional[str] = None,
     metadata: Optional[Dict[str, Any]] = None,
     traceback: bool = False,
     **kwargs
@@ -37,6 +39,12 @@ def _log(
     auto_ip_address = get_current_ip_address()
     auto_user_agent = get_current_user_agent()
     
+    # Try dynamic fetch from DRF authenticated request (lazy)
+    req = get_current_request()
+    if req and hasattr(req, 'user') and req.user.is_authenticated:
+        auto_actor_id = str(req.user.id)
+        auto_actor_type = ActorType.USER
+    
     # Auto-extract caller file/function
     caller_info = extract_caller_info()
     
@@ -50,6 +58,7 @@ def _log(
         "model_name": model_name,
         "actor_type": actor_type or auto_actor_type or ActorType.SYSTEM,
         "actor_id": actor_id or auto_actor_id,
+        "service_name": service_name,
         "metadata": metadata or {},
         "request_id": auto_request_id,
         "ip_address": auto_ip_address,

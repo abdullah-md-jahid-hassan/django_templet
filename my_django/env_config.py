@@ -55,8 +55,8 @@ class EnvConfig:
     MAX_VERIFY_ATTEMPTS = config("MAX_VERIFY_ATTEMPTS", default=5, cast=int)
 
     # JWT settings
-    JWT_ACCESS_TOKEN_LIFETIME_MINUTES = config('JWT_ACCESS_TOKEN_LIFETIME_MINUTES', default=15, cast=int)
-    JWT_REFRESH_TOKEN_LIFETIME_HOURS = config('JWT_REFRESH_TOKEN_LIFETIME_HOURS', default=30, cast=int)
+    ACCESS_TOKEN_LIFETIME_MINUTES = config('ACCESS_TOKEN_LIFETIME_MINUTES', default=15, cast=int)
+    REFRESH_TOKEN_LIFETIME_HOURS = config('REFRESH_TOKEN_LIFETIME_HOURS', default=30, cast=int)
 
     # Database settings
     DB_ENGINE = config('DB_ENGINE', default='django.db.backends.postgresql', cast=str)

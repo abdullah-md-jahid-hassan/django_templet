@@ -265,8 +265,8 @@ SIMPLE_JWT = {
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
     "AUTH_HEADER_TYPES": ("Bearer",),
     # Lifetime
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=CONFIG.JWT_ACCESS_TOKEN_LIFETIME_MINUTES),
-    "REFRESH_TOKEN_LIFETIME": timedelta(hours=CONFIG.JWT_REFRESH_TOKEN_LIFETIME_HOURS),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=CONFIG.ACCESS_TOKEN_LIFETIME_MINUTES),
+    "REFRESH_TOKEN_LIFETIME": timedelta(hours=CONFIG.REFRESH_TOKEN_LIFETIME_HOURS),
     # Properties
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,

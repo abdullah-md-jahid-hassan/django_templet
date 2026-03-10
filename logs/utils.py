@@ -9,6 +9,7 @@ actor_id_var = contextvars.ContextVar("actor_id", default=None)
 actor_type_var = contextvars.ContextVar("actor_type", default=None)
 ip_address_var = contextvars.ContextVar("ip_address", default=None)
 user_agent_var = contextvars.ContextVar("user_agent", default=None)
+request_var = contextvars.ContextVar("request", default=None)
 
 def get_current_request_id() -> str | None:
     return request_id_var.get()
@@ -24,6 +25,9 @@ def get_current_ip_address() -> str | None:
 
 def get_current_user_agent() -> str | None:
     return user_agent_var.get()
+
+def get_current_request():
+    return request_var.get()
 
 def extract_traceback() -> str | None:
     """Extracts the traceback of the current exception, if any."""

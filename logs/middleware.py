@@ -6,6 +6,7 @@ from .utils import (
     actor_type_var, 
     ip_address_var, 
     user_agent_var,
+    request_var,
 )
 from .choices import ActorType
 
@@ -23,6 +24,7 @@ class LoggingContextMiddleware(MiddlewareMixin):
         
         # Set into context variable
         request_id_var.set(req_id)
+        request_var.set(request)
         
         # Determine actor
         if hasattr(request, 'user') and request.user.is_authenticated:
@@ -54,5 +56,6 @@ class LoggingContextMiddleware(MiddlewareMixin):
         actor_type_var.set(None)
         ip_address_var.set(None)
         user_agent_var.set(None)
+        request_var.set(None)
             
         return response

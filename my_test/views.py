@@ -38,34 +38,68 @@ class test1(APIView): # Verify Otp
 
 class test2(APIView): # Test Logs
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         from logs.services import (
-            log_debug, log_info, log_success, 
+            log_debug, log_info, log_success,
             log_warning, log_error, log_critical
         )
 
-        # Trigger different severity logs
-        log_debug(event="test_debug", message="This is a test debug log.", metadata={"test_id": 1})
-        log_info(event="test_info", message="This is a test info log.")
-        log_success(event="test_success", message="This is a test success log.")
-        log_warning(event="test_warning", message="This is a test warning log.")
+        # ─────────────────────────────────────────────────────────────
+        # Scenario A: All log levels WITH service_name = "auth_service"
+        # Expected DB result: service_name = "auth_service" on each row
+        # ─────────────────────────────────────────────────────────────
+        log_debug(
+            event="svcA_debug",
+            message="[Scenario A] Debug log — auth_service.",
+            service_name="auth_service",
+            metadata={"scenario": "A", "step": "debug"},
+        )
+        log_info(
+            event="svcA_info",
+            message="[Scenario A] Info log — auth_service.",
+            service_name="auth_service",
+        )
+        log_success(
+            event="svcA_success",
+            message="[Scenario A] Success log — auth_service.",
+            service_name="auth_service",
+        )
+        log_warning(
+            event="svcA_warning",
+            message="[Scenario A] Warning log — auth_service.",
+            service_name="auth_service",
+        )
 
         try:
-            # Simulate an exception to test traceback extraction
             x = 1 / 0
         except Exception as e:
             log_error(
-                event="test_error", 
-                message=f"This is a test error log: {str(e)}", 
+                event="svcA_error",
+                message=f"[Scenario A] Error log — auth_service: {str(e)}",
+                service_name="auth_service",
                 traceback=True,
-                metadata={"custom_key": "custom_value"}
+                metadata={"custom_key": "custom_value"},
             )
             log_critical(
-                event="test_critical", 
-                message=f"This is a test critical log: {str(e)}", 
-                traceback=True
+                event="svcA_critical",
+                message=f"[Scenario A] Critical log — auth_service: {str(e)}",
+                service_name="auth_service",
+                traceback=True,
             )
+
+        # ─────────────────────────────────────────────────────────────
+        # Scenario B: Logs WITHOUT service_name
+        # Expected DB result: service_name = NULL on each row
+        # ─────────────────────────────────────────────────────────────
+        log_info(
+            event="svcB_info",
+            message="[Scenario B] Info log — NO service_name, should be null.",
+        )
+        log_warning(
+            event="svcB_warning",
+            message="[Scenario B] Warning log — NO service_name, should be null.",
+        )
 
         return success_response(
             message="Test logs generated successfully",
