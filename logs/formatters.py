@@ -18,7 +18,7 @@ class JSONFormatter(logging.Formatter):
         
         # Add all contextual data
         optional_fields = [
-            'actor_type', 'actor_id', 'model_name', 'file_name', 
+            'actor_type', 'actor_id', 'actor_email', 'business_id', 'model_name', 'file_name', 
             'function_name', 'service_name', 'request_id', 'ip_address', 'user_agent', 'metadata'
         ]
         

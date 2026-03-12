@@ -4,9 +4,11 @@ from .utils import (
     request_id_var, 
     actor_id_var, 
     actor_type_var, 
+    actor_email_var,
     ip_address_var, 
     user_agent_var,
     request_var,
+    business_id_var,
 )
 from .choices import ActorType
 
@@ -30,9 +32,20 @@ class LoggingContextMiddleware(MiddlewareMixin):
         if hasattr(request, 'user') and request.user.is_authenticated:
             actor_id_var.set(str(request.user.id))
             actor_type_var.set(ActorType.USER)
+            actor_email_var.set(str(request.user.email) if request.user.email else None)
+            # Set business_id from the authenticated user's profile
+            try:
+                if request.user.profile.business:
+                    business_id_var.set(str(request.user.profile.business.id))
+                else:
+                    business_id_var.set(None)
+            except Exception:
+                business_id_var.set(None)
         else:
             actor_id_var.set(None)
-            actor_type_var.set(ActorType.UNKNOWN)
+            actor_type_var.set(ActorType.ANONYMOUS)
+            actor_email_var.set(None)
+            business_id_var.set(None)
             
         # Determine IP Address
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -54,8 +67,10 @@ class LoggingContextMiddleware(MiddlewareMixin):
         request_id_var.set(None)
         actor_id_var.set(None)
         actor_type_var.set(None)
+        actor_email_var.set(None)
         ip_address_var.set(None)
         user_agent_var.set(None)
         request_var.set(None)
+        business_id_var.set(None)
             
         return response
