@@ -12,6 +12,9 @@ ip_address_var = contextvars.ContextVar("ip_address", default=None)
 user_agent_var = contextvars.ContextVar("user_agent", default=None)
 request_var = contextvars.ContextVar("request", default=None)
 business_id_var = contextvars.ContextVar("business_id", default=None)
+model_name_var = contextvars.ContextVar("model_name", default=None)
+service_name_var = contextvars.ContextVar("service_name", default=None)
+log_data_var = contextvars.ContextVar("log_data", default=None)
 
 def get_current_request_id() -> str | None:
     return request_id_var.get()
@@ -36,6 +39,17 @@ def get_current_business_id():
 
 def get_current_actor_email() -> str | None:
     return actor_email_var.get()
+
+def get_current_model_name() -> str | None:
+    return model_name_var.get()
+
+def get_current_service_name() -> str | None:
+    return service_name_var.get()
+
+def get_current_log_data() -> dict | None:
+    return log_data_var.get()
+
+
 
 def extract_traceback() -> str | None:
     """Extracts the traceback of the current exception, if any."""

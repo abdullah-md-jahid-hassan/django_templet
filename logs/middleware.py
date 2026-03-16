@@ -9,6 +9,10 @@ from .utils import (
     user_agent_var,
     request_var,
     business_id_var,
+
+    get_current_model_name,
+    get_current_service_name,
+    get_current_log_data,
 )
 from .choices import ActorType
 
@@ -20,6 +24,9 @@ class LoggingContextMiddleware(MiddlewareMixin):
     """
 
     def process_request(self, request):
+        # start time of the request
+        request.start_time = time.time()
+
         # Generate and store request ID
         req_id = request.META.get('HTTP_X_REQUEST_ID', str(uuid.uuid4()))
         request.request_id = req_id # Attach to request object for convenience
@@ -59,6 +66,28 @@ class LoggingContextMiddleware(MiddlewareMixin):
         user_agent_var.set(request.META.get('HTTP_USER_AGENT')[:255] if request.META.get('HTTP_USER_AGENT') else None)
 
     def process_response(self, request, response):
+        # request details
+        path = request.path
+        method = request.method
+        status_code = response.status_code
+        response_time = round(time.time() - request.start_time, 4)
+
+        # Get model name and log data from context variables
+        model_name = get_current_model_name() or None
+        log_data = get_current_log_data() or None
+        service_name = get_current_service_name() # Working here - jshrg3874
+
+        
+        
+
+
+
+
+
+
+
+
+        
         # We can append the request_id to the response headers for client tracking
         if hasattr(request, 'request_id'):
             response['X-Request-ID'] = request.request_id
