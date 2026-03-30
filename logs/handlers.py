@@ -29,6 +29,8 @@ class DatabaseHandler(logging.Handler):
                 
                 "actor_type": getattr(record, "actor_type", None),
                 "actor_id": getattr(record, "actor_id", None),
+                "actor_email": getattr(record, "actor_email", None),
+                "business_id": getattr(record, "business_id", None),
                 
                 "model_name": getattr(record, "model_name", None),
                 "file_name": getattr(record, "file_name", record.filename),

@@ -10,6 +10,8 @@ class SystemLog(models.Model):
     
     actor_type = models.CharField(max_length=50, blank=True, null=True)
     actor_id = models.CharField(max_length=255, blank=True, null=True)
+    actor_email = models.EmailField(max_length=255, blank=True, null=True)
+    business_id = models.CharField(max_length=255, blank=True, null=True)
     
     model_name = models.CharField(max_length=100, blank=True, null=True)
     file_name = models.CharField(max_length=255, blank=True, null=True)

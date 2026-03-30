@@ -37,11 +37,11 @@ LEVEL_STYLES = {
 
 @admin.register(SystemLog)
 class SystemLogAdmin(admin.ModelAdmin):
-    list_display = ('timestamp', 'colored_level', 'event_name', 'actor_type', 'actor_id', 'service_name', 'ip_address')
+    list_display = ('timestamp', 'colored_level', 'event_name', 'actor_type', 'actor_email', 'business_id', 'service_name', 'ip_address')
     list_filter = ('log_level', 'actor_type', 'event_name', 'service_name', 'timestamp')
-    search_fields = ('message', 'event_name', 'actor_id', 'request_id', 'ip_address')
+    search_fields = ('message', 'event_name', 'actor_id', 'actor_email', 'request_id', 'ip_address')
     readonly_fields = (
-        'timestamp', 'log_level', 'event_name', 'message', 'actor_type', 'actor_id',
+        'timestamp', 'log_level', 'event_name', 'message', 'actor_type', 'actor_id', 'actor_email', 'business_id',
         'model_name', 'file_name', 'function_name', 'traceback', 'metadata',
         'service_name', 'request_id', 'ip_address', 'user_agent', 'created_at'
     )

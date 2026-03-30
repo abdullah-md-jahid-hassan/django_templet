@@ -12,4 +12,4 @@ class ActorType(models.TextChoices):
     SYSTEM = "system", "System"
     USER = "user", "User"
     SERVICE = "service", "Service"
-    UNKNOWN = "unknown", "Unknown"
+    ANONYMOUS = "anonymous", "Anonymous"

@@ -8,6 +8,8 @@ from .utils import (
     get_current_actor_type,
     get_current_ip_address,
     get_current_user_agent,
+    get_current_business_id,
+    get_current_actor_email,
     extract_caller_info,
     extract_traceback,
     get_current_request,
@@ -38,12 +40,22 @@ def _log(
     auto_actor_type = get_current_actor_type()
     auto_ip_address = get_current_ip_address()
     auto_user_agent = get_current_user_agent()
+    auto_business_id = get_current_business_id()
+    auto_actor_email = get_current_actor_email()
     
     # Try dynamic fetch from DRF authenticated request (lazy)
+    # DRF auth runs after middleware, so re-fetch from the live request for accuracy
     req = get_current_request()
     if req and hasattr(req, 'user') and req.user.is_authenticated:
         auto_actor_id = str(req.user.id)
         auto_actor_type = ActorType.USER
+        auto_actor_email = str(req.user.email) if req.user.email else None
+        # Re-fetch business_id lazily (same pattern as actor_id)
+        try:
+            if req.user.profile and req.user.profile.business:
+                auto_business_id = str(req.user.profile.business.id)
+        except Exception:
+            pass  # keep whatever middleware set
     
     # Auto-extract caller file/function
     caller_info = extract_caller_info()
@@ -58,6 +70,8 @@ def _log(
         "model_name": model_name,
         "actor_type": actor_type or auto_actor_type or ActorType.SYSTEM,
         "actor_id": actor_id or auto_actor_id,
+        "actor_email": auto_actor_email,
+        "business_id": auto_business_id,
         "service_name": service_name,
         "metadata": metadata or {},
         "request_id": auto_request_id,
