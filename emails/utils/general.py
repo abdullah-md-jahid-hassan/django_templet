@@ -1,4 +1,3 @@
-import re
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.db import transaction
@@ -10,23 +9,15 @@ from emails.choices import (
 )
 from emails.serializers import EmailLogSerializer
 
-SENSITIVE_PURPOSES = {
-    EmailPurpose.OTP,
-    EmailPurpose.PASSWORD_RESET,
-    "otp",
-    "password_reset",
-}
-
 
 def send_email_core(
     *,
     subject: str,
     to_emails: list[str],
     bcc: list[str] = None,
-    from_email: str = None,
+    from_email: str = settings.DEFAULT_FROM_EMAIL,
     body: str = "",
     log_body: str = None,
-    raw_otp: str = None,
     body_type: EmailBodyType = EmailBodyType.HTML,
     email_log_id: int = None,
     purpose: EmailPurpose = EmailPurpose.OTHERS,
@@ -40,12 +31,10 @@ def send_email_core(
         subject (str): Email subject.
         body (str): Email body sent to recipient.
         log_body (str, optional): Masked/sanitized body saved to EmailLog.
-        raw_otp (str, optional): OTP string to automatically redact with '******' in logs.
         body_type (EmailBodyType): Email body type.
         email_log_id (int): Email log id.
         purpose (EmailPurpose): Email purpose.
     """
-    from_email = from_email or getattr(settings, "DEFAULT_FROM_EMAIL", "webmaster@localhost")
     email_log = None
 
     if email_log_id:
@@ -57,14 +46,7 @@ def send_email_core(
             pass
 
     if not email_log:
-        saved_body = log_body
-        if saved_body is None:
-            if raw_otp:
-                saved_body = body.replace(str(raw_otp), "******")
-            elif purpose in SENSITIVE_PURPOSES or str(purpose).lower() in ("otp", "password_reset"):
-                saved_body = re.sub(r'(?<=>)[0-9A-Za-z]{4,8}(?=<)|\b\d{4,8}\b', '******', body)
-            else:
-                saved_body = body
+        saved_body = log_body or body
 
         log_serializer = EmailLogSerializer(
             data={

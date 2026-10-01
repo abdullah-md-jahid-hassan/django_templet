@@ -204,7 +204,6 @@ class OTPService:
                     to_emails=[user],
                     body=rendered_body,
                     log_body=masked_body,
-                    raw_otp=otp,
                     body_type=EmailBodyType.HTML,
                     purpose=purpose,
                 )

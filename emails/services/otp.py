@@ -24,7 +24,6 @@ def send_otp_email(email: str, otp: str, otp_purpose: str = OtpPurpose.OTHER):
         to_emails=[email],
         body=rendered_body,
         log_body=masked_body,
-        raw_otp=otp,
         body_type=EmailBodyType.HTML,
         purpose=EmailPurpose.OTP,
     )
