@@ -34,7 +34,7 @@ _OTP_POLICY_TABLE: dict[str, OTPPolicy] = {
     OtpPurpose.LOGIN:            OTPPolicy( False,   False,    True,            True,        True),
     OtpPurpose.REGISTRATION:     OTPPolicy( True,    False,    True,            False,       False),
     OtpPurpose.PASSWORD_CHANGE:  OTPPolicy( False,   True,     False,           True,        True),
-    OtpPurpose.PASSWORD_RESET:   OTPPolicy( True,    False,    True,            False,       True),
+    OtpPurpose.PASSWORD_RESET:   OTPPolicy( True,    False,    True,            True,        True),
     OtpPurpose.CHANGE_EMAIL:     OTPPolicy( True,    True,     False,           True,        True),
     OtpPurpose.CHANGE_PHONE:     OTPPolicy( False,   True,     False,           True,        True),
     OtpPurpose.CHANGE_USERNAME:  OTPPolicy( False,   True,     False,           True,        True),

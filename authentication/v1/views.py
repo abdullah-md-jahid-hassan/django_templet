@@ -5,7 +5,12 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from core.utils.response import success_response, error_response
 from core.utils.general import get_or_400
-from authentication.throttles import RegisterThrottle, LoginThrottle, ChangePasswordThrottle
+from authentication.throttles import (
+    RegisterThrottle,
+    LoginThrottle,
+    ChangePasswordThrottle,
+    ResetPasswordThrottle,
+)
 from authentication.v1.serializers import RegisterSerializer, LoginSerializer
 from authentication.services import change_password, reset_password
 from otp.v1.serializers import OtpVerifySerializer
@@ -91,6 +96,7 @@ class ResetPasswordView(APIView):
     Complete a password reset after OTP verification.
     Flow: POST /v1/otp/get-otp/ (purpose=password_reset) → POST /v1/auth/password/reset/
     """
+    throttle_classes = [ResetPasswordThrottle]
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):

@@ -32,6 +32,25 @@ SECRET_KEY = CONFIG.SECRET_KEY
 DEBUG = CONFIG.DEBUG
 ALLOWED_HOSTS = CONFIG.ALLOWED_HOSTS if not DEBUG else ['*']
 
+import sys
+TESTING = "test" in sys.argv
+
+# Production SSL & Cookie Security
+if not DEBUG and not TESTING:
+    SECURE_SSL_REDIRECT = CONFIG.SECURE_SSL_REDIRECT
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
+
+if TESTING:
+    CELERY_TASK_ALWAYS_EAGER = True
+
 
 # =========
 # CORS
@@ -108,8 +127,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     "corsheaders.middleware.CorsMiddleware",
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -131,6 +150,9 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
 
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
@@ -143,7 +165,9 @@ REST_FRAMEWORK = {
         "login": f"{CONFIG.LOGIN_THROTTLE_RATE_PER_MINUTE}/min",
         "register": f"{CONFIG.REGISTER_THROTTLE_RATE_PER_MINUTE}/min",
         "change_password": f"{CONFIG.CHANGE_PASSWORD_THROTTLE_RATE_PER_MINUTE}/min",
+        "reset_password": f"{CONFIG.RESET_PASSWORD_THROTTLE_RATE_PER_MINUTE}/min",
         "get_otp": f"{CONFIG.GET_OTP_THROTTLE_RATE_PER_DAY}/day",
+        "health": f"{CONFIG.HEALTH_THROTTLE_RATE_PER_MINUTE}/min",
     },
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,

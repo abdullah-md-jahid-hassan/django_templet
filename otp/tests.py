@@ -98,7 +98,15 @@ class GetOtpRouteTests(APITestCase):
             400, "already exists", send_mock,
         )
 
-    def test_password_reset_does_not_require_existing_user(self, send_mock):
-        response = self.post({"purpose": "password_reset", "user_identifier": "whoever@example.com"})
+    def test_password_reset_requires_existing_user(self, send_mock):
+        # 1. Non-existent user should fail with 404
+        self.assert_error(
+            self.post({"purpose": "password_reset", "user_identifier": "nonexistent@example.com"}),
+            404, "User not found", send_mock,
+        )
+
+        # 2. Existing user succeeds
+        User.objects.create_user(email="registered@example.com", password="Str0ng-Pass!42")
+        response = self.post({"purpose": "password_reset", "user_identifier": "registered@example.com"})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         send_mock.assert_called_once()

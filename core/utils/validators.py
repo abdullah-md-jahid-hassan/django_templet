@@ -1,8 +1,6 @@
-# from django.core.validators import validate_email, validate_slug
-# from django.core.exceptions import ValidationError
-# from otp.enums import OtpChannel
-# from phonenumbers import NumberParseException
-# import phonenumbers
+from django.core.exceptions import ValidationError
+import phonenumbers
+from phonenumbers import NumberParseException
 
 
 def validate_phone(phone: str, region: str = None) -> str:

@@ -45,4 +45,10 @@ COPY . .
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# Create non-root user and set permissions
+RUN useradd -m -u 1000 appuser \
+    && chown -R appuser:appuser /app /venv
+
+USER appuser
+
 ENTRYPOINT ["sh", "/entrypoint.sh"]

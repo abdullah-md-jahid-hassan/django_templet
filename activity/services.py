@@ -51,6 +51,18 @@ def end_session(session_key: str) -> None:
     end_session_task.delay(session_key)
 
 
+def end_all_user_sessions(user) -> None:
+    """Terminate all active sessions for a user and clear the cached session key."""
+    from django.core.cache import cache
+    from django.utils import timezone
+    from .models import UserSession
+
+    UserSession.objects.filter(user=user, is_active=True).update(
+        is_active=False, ended_at=timezone.now()
+    )
+    cache.delete(f"activity:session:{user.pk}")
+
+
 def _build_activity_payload(user, session, request, response, duration_ms, request_id):
     user_agent = request.META.get("HTTP_USER_AGENT", "")
 

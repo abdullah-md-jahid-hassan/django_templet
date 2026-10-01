@@ -66,16 +66,29 @@ class OTPService:
         """
         Generate and store a new OTP.
 
-        Ensures max 5 active OTPs per user.
+        A new OTP request automatically invalidates any previously active OTP
+        for the same user and purpose, preventing multiple active codes.
         """
 
         user_hash = cls._user_hash(user)
         index_key = cls._index_key(purpose, user_hash)
 
+        # Invalidate any previously generated active OTPs for this user and purpose
+        existing_otp_ids = redis_client.lrange(index_key, 0, -1)
+        if existing_otp_ids:
+            pipe_cleanup = redis_client.pipeline()
+            for existing_id in existing_otp_ids:
+                pipe_cleanup.delete(cls._otp_key(purpose, user_hash, existing_id))
+            pipe_cleanup.delete(index_key)
+            pipe_cleanup.delete(cls._attempts_key(purpose, user_hash))
+            pipe_cleanup.execute()
+
         otp = random_string(
             length=CONFIG.OTP_LENGTH,
             allow_numbers=CONFIG.OTP_ALLOW_NUMBER,
             allow_capital=CONFIG.OTP_ALLOW_CAPITAL,
+            allow_small=CONFIG.OTP_ALLOW_SMALL,
+            allow_special=CONFIG.OTP_ALLOW_SPECIAL,
         )
         otp_hash = cls._hash_otp(otp)
         otp_id = str(uuid.uuid4())
@@ -92,9 +105,6 @@ class OTPService:
         pipe.expire(index_key, cls.OTP_TTL_SECONDS)
 
         pipe.execute()
-
-        # Enforce max active OTPs
-        cls._enforce_limit(index_key, purpose, user_hash)
 
         return otp
 

@@ -4,10 +4,32 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+from activity.services import end_all_user_sessions
+
+
+def revoke_user_tokens(user: User) -> None:
+    """Blacklist all outstanding SimpleJWT tokens for the user."""
+    try:
+        from rest_framework_simplejwt.token_blacklist.models import (
+            OutstandingToken,
+            BlacklistedToken,
+        )
+        tokens = OutstandingToken.objects.filter(user=user)
+        for token in tokens:
+            BlacklistedToken.objects.get_or_create(token=token)
+    except Exception:
+        pass
+
+
 def change_password(user: User, new_password: str) -> User:
     validate_password(new_password, user=user)
     user.set_password(new_password)
     user.save(update_fields=["password"])
+
+    # Security: Revoke all existing sessions and refresh tokens
+    revoke_user_tokens(user)
+    end_all_user_sessions(user)
+
     return user
 
 
