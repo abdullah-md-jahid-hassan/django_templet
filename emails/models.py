@@ -1,7 +1,7 @@
 from django.db import models
 
 from core.models import BaseModel
-from emails.choices import EmailBodyType, EmailStatus
+from emails.choices import EmailBodyType, EmailStatus, EmailPurpose
 
 
 class EmailLog(BaseModel):
@@ -12,6 +12,7 @@ class EmailLog(BaseModel):
     subject   = models.CharField(max_length=255, blank=True, null=True)
     body      = models.TextField(blank=True, null=True)
     body_type = models.CharField(max_length=255, choices=EmailBodyType.choices, default=EmailBodyType.TEXT)
+    purpose   = models.CharField(max_length=50, choices=EmailPurpose.choices, default=EmailPurpose.OTHERS, db_index=True)
 
     status    = models.CharField(max_length=255, choices=EmailStatus.choices, default=EmailStatus.SENT)
     try_count = models.IntegerField(default=1)

@@ -183,17 +183,28 @@ class OTPService:
         otp = cls.generate(user, purpose)
         match channel:
             case OtpChannel.EMAIL:
+                rendered_body = render_to_string(
+                    "otp_body.html",
+                    {
+                        "otp": otp,
+                        "purpose": purpose,
+                        "expiry_minutes": CONFIG.OTP_EXPIRY_MINUTES,
+                    },
+                )
+                masked_body = render_to_string(
+                    "otp_body.html",
+                    {
+                        "otp": "******",
+                        "purpose": purpose,
+                        "expiry_minutes": CONFIG.OTP_EXPIRY_MINUTES,
+                    },
+                )
                 send_email_task.delay(
                     subject="OTP",
                     to_emails=[user],
-                    body=render_to_string(
-                        "otp_body.html",
-                        {
-                            "otp": otp,
-                            "purpose": purpose,
-                            "expiry_minutes": CONFIG.OTP_EXPIRY_MINUTES,
-                        }
-                    ),
+                    body=rendered_body,
+                    log_body=masked_body,
+                    raw_otp=otp,
                     body_type=EmailBodyType.HTML,
                     purpose=purpose,
                 )

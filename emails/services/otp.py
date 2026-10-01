@@ -5,16 +5,26 @@ from emails.choices import EmailBodyType, EmailPurpose
 
 
 def send_otp_email(email: str, otp: str, otp_purpose: str = OtpPurpose.OTHER):
+    rendered_body = render_to_string(
+        "otp_body.html",
+        {
+            "otp": otp,
+            "purpose": otp_purpose,
+        },
+    )
+    masked_body = render_to_string(
+        "otp_body.html",
+        {
+            "otp": "******",
+            "purpose": otp_purpose,
+        },
+    )
     send_email_task.delay(
         subject=f"Your OTP Code",
         to_emails=[email],
-        body=render_to_string(
-            "otp_body.html",
-            {
-                "otp": otp,
-                "purpose": otp_purpose,
-            },
-        ),
+        body=rendered_body,
+        log_body=masked_body,
+        raw_otp=otp,
         body_type=EmailBodyType.HTML,
         purpose=EmailPurpose.OTP,
     )
