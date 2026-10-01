@@ -8,8 +8,10 @@ from core.utils.general import get_or_400
 from authentication.throttles import (
     RegisterThrottle,
     LoginThrottle,
+    LoginTargetThrottle,
     ChangePasswordThrottle,
     ResetPasswordThrottle,
+    ResetPasswordTargetThrottle,
 )
 from authentication.v1.serializers import RegisterSerializer, LoginSerializer
 from authentication.services import change_password, reset_password
@@ -46,7 +48,7 @@ class RegisterView(APIView):
 
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
-    throttle_classes = [LoginThrottle]
+    throttle_classes = [LoginThrottle, LoginTargetThrottle]
     permission_classes = [permissions.AllowAny]
 
 
@@ -96,7 +98,7 @@ class ResetPasswordView(APIView):
     Complete a password reset after OTP verification.
     Flow: POST /v1/otp/get-otp/ (purpose=password_reset) → POST /v1/auth/password/reset/
     """
-    throttle_classes = [ResetPasswordThrottle]
+    throttle_classes = [ResetPasswordThrottle, ResetPasswordTargetThrottle]
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):

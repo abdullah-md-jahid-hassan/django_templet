@@ -6,14 +6,22 @@ from rest_framework.views import APIView
 from core.utils.response import success_response
 from otp.services import OTPService
 from otp.services.rules import verify_otp_rules
-from otp.throttles import GetOtpRateThrottle
+from otp.throttles import (
+    OtpAnonRateThrottle,
+    OtpUserRateThrottle,
+    OtpTargetRateThrottle,
+)
 
 CONFIG = settings.CONFIG
 
 
 class GetOtpView(APIView):
     permission_classes = [AllowAny]
-    throttle_classes = [GetOtpRateThrottle]
+    throttle_classes = [
+        OtpAnonRateThrottle,
+        OtpUserRateThrottle,
+        OtpTargetRateThrottle,
+    ]
 
     def post(self, request):
         ok, result = verify_otp_rules(request)

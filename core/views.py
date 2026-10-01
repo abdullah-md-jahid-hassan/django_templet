@@ -16,6 +16,7 @@ class HealthCheckView(APIView):
     Returns HTTP 503 if the database is unavailable.
     """
     permission_classes = [AllowAny]
+    throttle_classes = []
 
     def get(self, request, *args, **kwargs):
         try:

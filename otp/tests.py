@@ -110,3 +110,33 @@ class GetOtpRouteTests(APITestCase):
         response = self.post({"purpose": "password_reset", "user_identifier": "registered@example.com"})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         send_mock.assert_called_once()
+
+    def test_target_identifier_throttle_blocks_rotating_ips(self, send_mock):
+        from otp.throttles import OtpTargetRateThrottle
+        with patch.object(OtpTargetRateThrottle, "get_rate", return_value="2/hour"):
+            # Request 1 from IP 1
+            r1 = self.client.post(
+                GET_OTP_URL,
+                {"purpose": "registration", "user_identifier": "victim@example.com"},
+                REMOTE_ADDR="198.51.100.1",
+                format="json",
+            )
+            self.assertEqual(r1.status_code, status.HTTP_200_OK)
+
+            # Request 2 from IP 2 (attacker rotates IP)
+            r2 = self.client.post(
+                GET_OTP_URL,
+                {"purpose": "registration", "user_identifier": "victim@example.com"},
+                REMOTE_ADDR="198.51.100.2",
+                format="json",
+            )
+            self.assertEqual(r2.status_code, status.HTTP_200_OK)
+
+            # Request 3 from IP 3 -> target rate limit exceeded (429) even though IP is brand new!
+            r3 = self.client.post(
+                GET_OTP_URL,
+                {"purpose": "registration", "user_identifier": "victim@example.com"},
+                REMOTE_ADDR="198.51.100.3",
+                format="json",
+            )
+            self.assertEqual(r3.status_code, status.HTTP_429_TOO_MANY_REQUESTS)

@@ -50,6 +50,8 @@ if not DEBUG and not TESTING:
 
 if TESTING:
     CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_BROKER_URL = "memory://"
+    CELERY_RESULT_BACKEND = "cache+memory://"
 
 
 # =========
@@ -160,13 +162,19 @@ REST_FRAMEWORK = {
     ],
 
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "20/min",
-        "user": "200/min",
+        "anon": f"{CONFIG.ANON_THROTTLE_RATE_PER_MINUTE}/min",
+        "user": f"{CONFIG.USER_THROTTLE_RATE_PER_MINUTE}/min",
         "login": f"{CONFIG.LOGIN_THROTTLE_RATE_PER_MINUTE}/min",
+        "login_target": f"{CONFIG.LOGIN_TARGET_THROTTLE_RATE_PER_MINUTE}/min",
         "register": f"{CONFIG.REGISTER_THROTTLE_RATE_PER_MINUTE}/min",
         "change_password": f"{CONFIG.CHANGE_PASSWORD_THROTTLE_RATE_PER_MINUTE}/min",
         "reset_password": f"{CONFIG.RESET_PASSWORD_THROTTLE_RATE_PER_MINUTE}/min",
+        "reset_password_target": f"{CONFIG.RESET_PASSWORD_TARGET_THROTTLE_RATE_PER_MINUTE}/min",
         "get_otp": f"{CONFIG.GET_OTP_THROTTLE_RATE_PER_DAY}/day",
+        "otp_anon": f"{CONFIG.OTP_ANON_THROTTLE_RATE_PER_MINUTE}/min",
+        "otp_user": f"{CONFIG.GET_OTP_THROTTLE_RATE_PER_DAY}/day",
+        "otp_target": f"{CONFIG.OTP_TARGET_THROTTLE_RATE_PER_HOUR}/hour",
+        "target_identifier": "60/min",
         "health": f"{CONFIG.HEALTH_THROTTLE_RATE_PER_MINUTE}/min",
     },
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
@@ -247,7 +255,7 @@ REDIS_URL = CONFIG.REDIS_URL
 # =========================================
 # Cache
 # =========================================
-if REDIS_URL:
+if not TESTING and REDIS_URL:
     CACHES = {
         'default': {
             'BACKEND': 'django_redis.cache.RedisCache',
