@@ -49,3 +49,58 @@ class CoreThrottlesUnitTests(TestCase):
         cache_key = throttle.get_cache_key(request, None)
         self.assertIsNotNone(cache_key)
         self.assertIn("victim@example.com", cache_key)
+
+
+class GetClientIpTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_direct_connection_uses_remote_addr(self):
+        from core.utils.general import get_client_ip
+        request = self.factory.get("/", REMOTE_ADDR="198.51.100.22")
+        self.assertEqual(get_client_ip(request), "198.51.100.22")
+
+    def test_spoofed_x_forwarded_for_extracts_trusted_proxy_ip_from_right(self):
+        from core.utils.general import get_client_ip
+        # Attacker injects fake IPs at the beginning: "1.1.1.1, 8.8.8.8".
+        # Trusted reverse proxy appended actual client IP: "198.51.100.99".
+        request = self.factory.get(
+            "/",
+            HTTP_X_FORWARDED_FOR="1.1.1.1, 8.8.8.8, 198.51.100.99",
+            REMOTE_ADDR="10.0.0.1",
+        )
+        with self.settings(NUM_PROXIES=1):
+            ip = get_client_ip(request)
+            self.assertEqual(ip, "198.51.100.99")
+            self.assertNotEqual(ip, "1.1.1.1")
+
+    def test_multi_hop_proxy_chain_respects_num_proxies(self):
+        from core.utils.general import get_client_ip
+        # Architecture: Client (198.51.100.5) -> CDN/LB -> Nginx -> Gunicorn
+        # In a 2-proxy chain, the 2nd hop from the right is the genuine client:
+        request = self.factory.get(
+            "/",
+            HTTP_X_FORWARDED_FOR="198.51.100.5, 172.16.0.2",
+            REMOTE_ADDR="10.0.0.2",
+        )
+        with self.settings(NUM_PROXIES=2):
+            self.assertEqual(get_client_ip(request), "198.51.100.5")
+
+    def test_cloudflare_connecting_ip_takes_precedence(self):
+        from core.utils.general import get_client_ip
+        request = self.factory.get(
+            "/",
+            HTTP_CF_CONNECTING_IP="203.0.113.88",
+            HTTP_X_FORWARDED_FOR="1.1.1.1, 10.0.0.5",
+            REMOTE_ADDR="10.0.0.1",
+        )
+        self.assertEqual(get_client_ip(request), "203.0.113.88")
+
+    def test_malformed_ip_in_headers_safely_falls_back(self):
+        from core.utils.general import get_client_ip
+        request = self.factory.get(
+            "/",
+            HTTP_X_FORWARDED_FOR="<script>alert(1)</script>, invalid-ip",
+            REMOTE_ADDR="198.51.100.44",
+        )
+        self.assertEqual(get_client_ip(request), "198.51.100.44")

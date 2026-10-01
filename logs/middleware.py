@@ -1,5 +1,6 @@
 import uuid
 from django.utils.deprecation import MiddlewareMixin
+from core.utils.general import get_client_ip
 from .utils import (
     request_id_var, 
     actor_id_var, 
@@ -47,12 +48,8 @@ class LoggingContextMiddleware(MiddlewareMixin):
             actor_email_var.set(None)
             business_id_var.set(None)
             
-        # Determine IP Address
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0]
-        else:
-            ip = request.META.get('REMOTE_ADDR')
+        # Determine IP Address safely without trusting spoofed X-Forwarded-For
+        ip = get_client_ip(request)
         ip_address_var.set(ip)
         
         # Determine User Agent

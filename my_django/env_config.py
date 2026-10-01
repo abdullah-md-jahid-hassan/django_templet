@@ -7,6 +7,7 @@ class EnvConfig:
     ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=str).split(',')
 
     SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
+    NUM_PROXIES = config('NUM_PROXIES', default=1, cast=int)
 
     # CORS Settings
     CORS_ALLOW_CREDENTIALS = config('CORS_ALLOW_CREDENTIALS', default=True, cast=bool)

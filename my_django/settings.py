@@ -34,6 +34,7 @@ ALLOWED_HOSTS = CONFIG.ALLOWED_HOSTS if not DEBUG else ['*']
 
 import sys
 TESTING = "test" in sys.argv
+NUM_PROXIES = CONFIG.NUM_PROXIES
 
 # Production SSL & Cookie Security
 if not DEBUG and not TESTING:
@@ -48,10 +49,7 @@ if not DEBUG and not TESTING:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
 
-if TESTING:
-    CELERY_TASK_ALWAYS_EAGER = True
-    CELERY_BROKER_URL = "memory://"
-    CELERY_RESULT_BACKEND = "cache+memory://"
+
 
 
 # =========
@@ -179,6 +177,7 @@ REST_FRAMEWORK = {
     },
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    "NUM_PROXIES": NUM_PROXIES,
     "EXCEPTION_HANDLER": "core.utils.exception_handler.custom_exception_handler",
 }
 
@@ -275,11 +274,15 @@ else:
 
 # =========================================
 # Celery
-# =========================================
 from kombu import Queue
 
-CELERY_BROKER_URL = CONFIG.CELERY_BROKER_URL
-CELERY_RESULT_BACKEND = CONFIG.CELERY_RESULT_BACKEND
+if TESTING:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_BROKER_URL = "memory://"
+    CELERY_RESULT_BACKEND = "cache+memory://"
+else:
+    CELERY_BROKER_URL = CONFIG.CELERY_BROKER_URL
+    CELERY_RESULT_BACKEND = CONFIG.CELERY_RESULT_BACKEND
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'

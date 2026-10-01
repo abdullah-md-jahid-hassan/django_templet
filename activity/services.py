@@ -2,6 +2,7 @@ import re
 import uuid
 import logging
 
+from core.utils.general import get_client_ip
 from .choices import DeviceType
 from .constants import resolve_action, resolve_service
 
@@ -22,10 +23,7 @@ def _detect_device_type(user_agent):
 
 
 def _get_ip(request):
-    xff = request.META.get("HTTP_X_FORWARDED_FOR")
-    if xff:
-        return xff.split(",")[0].strip()
-    return request.META.get("REMOTE_ADDR")
+    return get_client_ip(request)
 
 
 def start_session(user, request):
