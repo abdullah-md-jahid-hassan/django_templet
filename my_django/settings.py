@@ -63,7 +63,7 @@ WSGI_APPLICATION = 'my_django.wsgi.application'
 # Internationalization
 # =========================================
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Dhaka'
 USE_I18N = True
 USE_TZ = True
 
@@ -251,7 +251,7 @@ CELERY_RESULT_BACKEND = CONFIG.CELERY_RESULT_BACKEND
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
+CELERY_TIMEZONE = 'Asia/Dhaka'
 CELERY_TASK_IGNORE_RESULT = True
 
 # Isolated from "default" so high-volume, non-critical activity writes can
@@ -296,5 +296,3 @@ SIMPLE_JWT = {
 
 from logs.logging_config import get_logging_config
 LOGGING = get_logging_config(service_name="my_backend")
-
-
