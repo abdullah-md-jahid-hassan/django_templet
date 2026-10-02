@@ -1,0 +1,33 @@
+meta {
+  name: Mark Non-Existent Notification As Read (404 Test)
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}{{apiPrefix}}/notifications/99999999/read/
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("Status code is 404 Not Found", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+
+  test("Error message indicates notification not found", function() {
+    const body = res.getBody();
+    expect(body.success).to.be.false;
+    expect(body.message).to.include("Notification not found or already read");
+  });
+}
+
+docs {
+  # Mark Non-Existent Notification Read Validation Test
+  
+  Ensures that attempting to mark a missing or foreign notification as read yields HTTP 404.
+}

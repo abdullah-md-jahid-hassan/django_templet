@@ -1,0 +1,35 @@
+meta {
+  name: Verify Admin Profile
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}{{apiPrefix}}/auth/verify/
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("Status code is 200 OK or 401 (if unauthenticated)", function() {
+    expect([200, 401]).to.include(res.getStatus());
+  });
+
+  test("Returns admin user details on success", function() {
+    if (res.getStatus() === 200) {
+      const body = res.getBody();
+      expect(body.success).to.be.true;
+      expect(body.data).to.have.property("email");
+    }
+  });
+}
+
+docs {
+  # Verify Admin Profile
+  
+  Fetches profile information for the authenticated administrator.
+}

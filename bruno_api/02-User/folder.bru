@@ -1,0 +1,12 @@
+meta {
+  name: User
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+vars:pre-request {
+  userEmail: testuser@example.com
+  userPassword: TestSecurePass123!
+}

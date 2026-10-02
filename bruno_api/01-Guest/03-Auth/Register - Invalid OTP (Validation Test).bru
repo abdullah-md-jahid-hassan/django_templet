@@ -1,0 +1,44 @@
+meta {
+  name: Register - Invalid OTP (Validation Test)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/register/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "first_name": "Invalid",
+    "last_name": "Otp",
+    "email": "fresh_unique_email_test@example.com",
+    "password": "Password123!",
+    "otp": "000000"
+  }
+}
+
+tests {
+  test("Status code is 400 Bad Request", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+
+  test("Unified error envelope returned", function() {
+    const body = res.getBody();
+    expect(body.success).to.be.false;
+    expect(body.errors).to.not.be.null;
+  });
+}
+
+docs {
+  # Register Invalid OTP Validation Test
+  
+  Verifies that an incorrect or expired OTP rejects the registration attempt with HTTP 400.
+}

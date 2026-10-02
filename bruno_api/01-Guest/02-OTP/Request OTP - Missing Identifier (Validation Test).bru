@@ -1,0 +1,40 @@
+meta {
+  name: Request OTP - Missing Identifier (Validation Test)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/otp/get-otp/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "purpose": "registration"
+  }
+}
+
+tests {
+  test("Status code is 400 Bad Request", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+
+  test("Unified error response envelope confirms missing user_identifier", function() {
+    const body = res.getBody();
+    expect(body.success).to.be.false;
+    expect(body.message.toLowerCase()).to.include("user_identifier");
+  });
+}
+
+docs {
+  # Request OTP - Missing Identifier Validation
+  
+  Ensures requests with missing required identifiers are rejected before dispatching.
+}

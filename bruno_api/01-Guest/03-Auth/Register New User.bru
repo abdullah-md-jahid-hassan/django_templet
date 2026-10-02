@@ -1,0 +1,72 @@
+meta {
+  name: Register New User
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/register/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "first_name": "{{guestFirstName}}",
+    "last_name": "{{guestLastName}}",
+    "email": "{{guestIdentifier}}",
+    "password": "{{guestPassword}}",
+    "otp": "{{registrationOtp}}"
+  }
+}
+
+vars:post-response {
+  accessToken: res.body && res.body.data && res.body.data.access ? res.body.data.access : bru.getVar("accessToken")
+  refreshToken: res.body && res.body.data && res.body.data.refresh ? res.body.data.refresh : bru.getVar("refreshToken")
+}
+
+tests {
+  test("Status code is 201 Created or 400 (if already registered)", function() {
+    expect([201, 400]).to.include(res.getStatus());
+  });
+
+  test("Unified response envelope structure", function() {
+    const body = res.getBody();
+    expect(body).to.be.an("object");
+    expect(body).to.have.property("success");
+    expect(body).to.have.property("message");
+  });
+
+  test("Successful registration returns user email and JWT tokens", function() {
+    if (res.getStatus() === 201) {
+      const body = res.getBody();
+      expect(body.success).to.be.true;
+      expect(body.data).to.have.property("email");
+      expect(body.data).to.have.property("access");
+      expect(body.data).to.have.property("refresh");
+      expect(body.data.access).to.be.a("string").and.not.empty;
+      expect(body.data.refresh).to.be.a("string").and.not.empty;
+    }
+  });
+}
+
+docs {
+  # Register New User
+  
+  Completes user registration after receiving an OTP via `/v1/otp/get-otp/`.
+  
+  - **Method**: `POST`
+  - **Path**: `/v1/auth/register/`
+  - **Auth**: None (Public)
+  - **Payload**:
+    - `first_name`: string
+    - `last_name`: string
+    - `email`: string
+    - `password`: string (min 8 chars)
+    - `otp`: string (received in email)
+}

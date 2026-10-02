@@ -1,0 +1,39 @@
+meta {
+  name: Get Unread Notification Count
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}{{apiPrefix}}/notifications/unread-count/
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("Status code is 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Returns unread count as number", function() {
+    const body = res.getBody();
+    expect(body.success).to.be.true;
+    expect(body.data).to.have.property("count");
+    expect(body.data.count).to.be.a("number");
+    expect(body.data.count).to.be.at.least(0);
+  });
+}
+
+docs {
+  # Get Unread Notification Count
+  
+  Returns total count of unread notifications for current user.
+  
+  - **Method**: `GET`
+  - **Path**: `/v1/notifications/unread-count/`
+  - **Auth**: Bearer Token (Inherited)
+}

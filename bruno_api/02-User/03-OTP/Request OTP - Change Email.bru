@@ -1,0 +1,46 @@
+meta {
+  name: Request OTP - Change Email
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/otp/get-otp/
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "purpose": "change_email"
+  }
+}
+
+tests {
+  test("Status code is 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Unified response confirms authenticated OTP dispatch", function() {
+    const body = res.getBody();
+    expect(body.success).to.be.true;
+    expect(body.message).to.include("OTP sent successfully");
+  });
+}
+
+docs {
+  # Request Authenticated OTP for Changing Email
+  
+  Dispatches an OTP to current authenticated user's registered email to authorize an email change request.
+  
+  - **Method**: `POST`
+  - **Path**: `/v1/otp/get-otp/`
+  - **Auth**: Bearer Token (Inherited)
+  - **Payload**:
+    - `purpose`: `"change_email"`
+}

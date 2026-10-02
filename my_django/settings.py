@@ -33,7 +33,7 @@ DEBUG = CONFIG.DEBUG
 ALLOWED_HOSTS = CONFIG.ALLOWED_HOSTS if not DEBUG else ['*']
 
 import sys
-TESTING = "test" in sys.argv
+TESTING = "test" in sys.argv or any("pytest" in arg for arg in sys.argv)
 NUM_PROXIES = CONFIG.NUM_PROXIES
 
 # Production SSL & Cookie Security

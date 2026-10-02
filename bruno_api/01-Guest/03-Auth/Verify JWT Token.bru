@@ -1,0 +1,47 @@
+meta {
+  name: Verify JWT Token
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/token/verify/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "token": "{{accessToken}}"
+  }
+}
+
+tests {
+  test("Status code is 200 OK or 401 (if expired)", function() {
+    expect([200, 401]).to.include(res.getStatus());
+  });
+
+  test("Valid token returns empty JSON object with 200", function() {
+    if (res.getStatus() === 200) {
+      const body = res.getBody();
+      expect(body).to.be.an("object");
+    }
+  });
+}
+
+docs {
+  # Verify JWT Token Validity
+  
+  Checks whether a given access token is currently valid and unexpired.
+  
+  - **Method**: `POST`
+  - **Path**: `/v1/auth/token/verify/`
+  - **Auth**: None (Public)
+  - **Payload**:
+    - `token`: string
+}

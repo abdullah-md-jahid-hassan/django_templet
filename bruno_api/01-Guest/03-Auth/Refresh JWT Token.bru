@@ -1,0 +1,53 @@
+meta {
+  name: Refresh JWT Token
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/token/refresh/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "refresh": "{{refreshToken}}"
+  }
+}
+
+vars:post-response {
+  accessToken: res.body && res.body.data ? res.body.data.access : (res.body ? res.body.access : "")
+}
+
+tests {
+  test("Status code is 200 OK or 401 (if token blacklisted)", function() {
+    expect([200, 401]).to.include(res.getStatus());
+  });
+
+  test("Refreshed access token received", function() {
+    if (res.getStatus() === 200) {
+      const body = res.getBody();
+      const data = body.data || body;
+      expect(data).to.have.property("access");
+      expect(data.access).to.be.a("string").and.not.empty;
+    }
+  });
+}
+
+docs {
+  # Refresh JWT Access Token
+  
+  Exchanges an active refresh token for a newly signed access token.
+  
+  - **Method**: `POST`
+  - **Path**: `/v1/auth/token/refresh/`
+  - **Auth**: None (Public)
+  - **Payload**:
+    - `refresh`: string
+}

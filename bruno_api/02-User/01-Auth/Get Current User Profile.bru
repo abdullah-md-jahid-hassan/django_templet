@@ -1,0 +1,47 @@
+meta {
+  name: Get Current User Profile
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}{{apiPrefix}}/auth/verify/
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("Status code is 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Unified response envelope format", function() {
+    const body = res.getBody();
+    expect(body).to.be.an("object");
+    expect(body.success).to.be.true;
+    expect(body.message).to.equal("User verified successfully");
+  });
+
+  test("User profile contains expected properties", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property("id");
+    expect(body.data).to.have.property("email");
+    expect(body.data).to.have.property("first_name");
+    expect(body.data).to.have.property("last_name");
+    expect(body.data.email).to.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+  });
+}
+
+docs {
+  # Get Current User Profile
+  
+  Returns profile information for the authenticated user decoded from the Bearer token.
+  
+  - **Method**: `GET`
+  - **Path**: `/v1/auth/verify/`
+  - **Auth**: Bearer Token (Inherited from User folder)
+}

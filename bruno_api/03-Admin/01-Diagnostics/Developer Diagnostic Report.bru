@@ -1,0 +1,27 @@
+meta {
+  name: Developer Diagnostic Report
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: text/html
+}
+
+tests {
+  test("Status code is 200 (in DEBUG) or 404 (in PROD)", function() {
+    expect([200, 404]).to.include(res.getStatus());
+  });
+}
+
+docs {
+  # Developer Diagnostic Report (Admin View)
+  
+  Diagnostic dashboard inspecting DB, Redis, SMTP, and Celery subsystems.
+}

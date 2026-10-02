@@ -1,0 +1,42 @@
+meta {
+  name: Check System Health
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/health/
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Database status is healthy", function() {
+    const body = res.getBody();
+    expect(body).to.be.an("object");
+    expect(body.status).to.equal("healthy");
+  });
+
+  test("Response time is acceptable (< 2000ms)", function() {
+    expect(res.getResponseTime()).to.be.below(2000);
+  });
+}
+
+docs {
+  # Health Check Endpoint
+  
+  Lightweight health check for load balancers, container orchestrators, and monitoring probes.
+  
+  - **Method**: `GET`
+  - **Path**: `/health/`
+  - **Auth**: None (Public)
+  - **Expected Response**: `200 OK` with `{"status": "healthy"}`
+}

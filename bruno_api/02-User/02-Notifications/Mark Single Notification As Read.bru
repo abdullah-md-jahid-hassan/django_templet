@@ -1,0 +1,39 @@
+meta {
+  name: Mark Single Notification As Read
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{baseUrl}}{{apiPrefix}}/notifications/{{notificationId}}/read/
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("Status code is 200 OK or 404 (if not found/already read)", function() {
+    expect([200, 404]).to.include(res.getStatus());
+  });
+
+  test("Successful update confirms notification marked as read", function() {
+    if (res.getStatus() === 200) {
+      const body = res.getBody();
+      expect(body.success).to.be.true;
+      expect(body.message).to.equal("Notification marked as read");
+    }
+  });
+}
+
+docs {
+  # Mark Single Notification As Read
+  
+  Marks a specific notification owned by the current user as read.
+  
+  - **Method**: `PATCH`
+  - **Path**: `/v1/notifications/:id/read/`
+  - **Auth**: Bearer Token (Inherited)
+}

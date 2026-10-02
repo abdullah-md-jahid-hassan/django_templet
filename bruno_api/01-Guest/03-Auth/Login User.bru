@@ -1,0 +1,60 @@
+meta {
+  name: Login User
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/login/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "email": "{{userEmail}}",
+    "password": "{{userPassword}}"
+  }
+}
+
+vars:post-response {
+  accessToken: res.body && res.body.data ? res.body.data.access : (res.body ? res.body.access : "")
+  refreshToken: res.body && res.body.data ? res.body.data.refresh : (res.body ? res.body.refresh : "")
+}
+
+tests {
+  test("Status code is 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Returns access and refresh tokens", function() {
+    const body = res.getBody();
+    const data = body.data || body;
+    expect(data).to.have.property("access");
+    expect(data).to.have.property("refresh");
+    expect(data.access).to.be.a("string").and.not.empty;
+    expect(data.refresh).to.be.a("string").and.not.empty;
+  });
+
+  test("Tokens automatically saved to environment variables", function() {
+    expect(bru.getVar("accessToken")).to.be.a("string").and.not.empty;
+  });
+}
+
+docs {
+  # User Login Endpoint
+  
+  Authenticates user with email and password and returns JWT access + refresh tokens.
+  
+  - **Method**: `POST`
+  - **Path**: `/v1/auth/login/`
+  - **Auth**: None (Public)
+  - **Payload**:
+    - `email`: string
+    - `password`: string
+}

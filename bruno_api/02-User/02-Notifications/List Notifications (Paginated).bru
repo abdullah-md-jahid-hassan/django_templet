@@ -1,0 +1,63 @@
+meta {
+  name: List Notifications (Paginated)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}{{apiPrefix}}/notifications/?page=1
+  body: none
+  auth: inherit
+}
+
+params:query {
+  page: 1
+}
+
+headers {
+  Accept: application/json
+}
+
+vars:post-response {
+  notificationId: res.body && res.body.data && res.body.data.results && res.body.data.results.length > 0 ? res.body.data.results[0].id : 1
+}
+
+tests {
+  test("Status code is 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Unified response envelope with paginated data", function() {
+    const body = res.getBody();
+    expect(body).to.be.an("object");
+    expect(body.success).to.be.true;
+    expect(body.message).to.equal("Notifications retrieved");
+    expect(body.data).to.have.property("count");
+    expect(body.data).to.have.property("results");
+    expect(body.data.results).to.be.an("array");
+  });
+
+  test("Notification items have valid schema", function() {
+    const body = res.getBody();
+    if (body.data.results.length > 0) {
+      const first = body.data.results[0];
+      expect(first).to.have.property("id");
+      expect(first).to.have.property("title");
+      expect(first).to.have.property("body");
+      expect(first).to.have.property("is_read");
+      expect(first.is_read).to.be.a("boolean");
+    }
+  });
+}
+
+docs {
+  # List Notifications Endpoint
+  
+  Returns paginated list of notifications for the authenticated user.
+  
+  - **Method**: `GET`
+  - **Path**: `/v1/notifications/`
+  - **Auth**: Bearer Token (Inherited)
+  - **Query Params**:
+    - `page`: Page number (default: 1)
+}

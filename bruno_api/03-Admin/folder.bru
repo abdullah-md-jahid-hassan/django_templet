@@ -1,0 +1,12 @@
+meta {
+  name: Admin
+}
+
+headers {
+  Authorization: Bearer {{adminAccessToken}}
+}
+
+vars:pre-request {
+  adminEmail: admin@example.com
+  adminPassword: AdminPassword123!
+}

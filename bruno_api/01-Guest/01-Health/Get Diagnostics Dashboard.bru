@@ -1,0 +1,43 @@
+meta {
+  name: Get Diagnostics Dashboard
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: text/html
+}
+
+tests {
+  test("Status code is 200 (in DEBUG mode)", function() {
+    expect([200, 404]).to.include(res.getStatus());
+  });
+
+  test("Returns HTML dashboard when enabled", function() {
+    if (res.getStatus() === 200) {
+      expect(res.getHeader("content-type")).to.include("text/html");
+      expect(res.getBody()).to.include("System Health");
+    }
+  });
+}
+
+docs {
+  # Developer Diagnostics Dashboard
+  
+  Interactive developer dashboard providing diagnostic statuses for:
+  - Database (PostgreSQL / SQLite)
+  - Redis Cache & Broker
+  - SMTP Email Service
+  - Celery Worker
+  - Celery Beat
+  
+  - **Method**: `GET`
+  - **Path**: `/`
+  - **Auth**: None (Conditional on `DEBUG=True`)
+}

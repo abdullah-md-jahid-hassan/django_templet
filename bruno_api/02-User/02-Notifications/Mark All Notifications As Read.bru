@@ -1,0 +1,38 @@
+meta {
+  name: Mark All Notifications As Read
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}{{apiPrefix}}/notifications/read-all/
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("Status code is 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Returns count of updated notifications", function() {
+    const body = res.getBody();
+    expect(body.success).to.be.true;
+    expect(body.data).to.have.property("updated");
+    expect(body.data.updated).to.be.a("number");
+  });
+}
+
+docs {
+  # Mark All Notifications As Read
+  
+  Marks all unread notifications for the authenticated user as read in a single batch operation.
+  
+  - **Method**: `PATCH`
+  - **Path**: `/v1/notifications/read-all/`
+  - **Auth**: Bearer Token (Inherited)
+}

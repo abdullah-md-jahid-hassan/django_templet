@@ -1,0 +1,43 @@
+meta {
+  name: Register - Duplicate Email (Validation Test)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/register/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "first_name": "Test",
+    "last_name": "User",
+    "email": "testuser@example.com",
+    "password": "Password123!",
+    "otp": "123456"
+  }
+}
+
+tests {
+  test("Status code is 400 Bad Request", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+
+  test("Unified error response envelope indicates error", function() {
+    const body = res.getBody();
+    expect(body.success).to.be.false;
+  });
+}
+
+docs {
+  # Register Duplicate Email Validation Test
+  
+  Verifies that attempting to register an existing email is rejected with HTTP 400.
+}

@@ -1,0 +1,48 @@
+meta {
+  name: Logout User
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/logout/
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "refresh": "{{refreshToken}}"
+  }
+}
+
+tests {
+  test("Status code is 200 OK or 400 (if already blacklisted)", function() {
+    expect([200, 400]).to.include(res.getStatus());
+  });
+
+  test("Logout success confirmation", function() {
+    if (res.getStatus() === 200) {
+      const body = res.getBody();
+      expect(body.success).to.be.true;
+      expect(body.message).to.equal("Logged out successfully");
+    }
+  });
+}
+
+docs {
+  # Logout User Endpoint
+  
+  Terminates user session and blacklists the provided refresh token so it cannot be used again.
+  
+  - **Method**: `POST`
+  - **Path**: `/v1/auth/logout/`
+  - **Auth**: Bearer Token (Inherited)
+  - **Payload**:
+    - `refresh`: string
+}

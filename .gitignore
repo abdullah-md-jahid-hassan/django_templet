@@ -49,7 +49,11 @@ docker-compose.override.yml
 # ===== Secrets =====
 *.pem
 *.key
-secrets/
+/secrets/
+bruno_api/secrets/*
+!bruno_api/secrets/*.example.env
+!bruno_api/secrets/README.md
+bruno_api/environments/secrets/
 
 # ===== Celery =====
 celerybeat-schedule

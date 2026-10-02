@@ -1,0 +1,42 @@
+meta {
+  name: Request OTP - Invalid Purpose (Validation Test)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/otp/get-otp/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "purpose": "unsupported_purpose_action",
+    "user_identifier": "testuser@example.com"
+  }
+}
+
+tests {
+  test("Status code is 400 Bad Request", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+
+  test("Unified error response envelope", function() {
+    const body = res.getBody();
+    expect(body.success).to.be.false;
+    expect(body.message).to.be.a("string");
+    expect(body.message.toLowerCase()).to.include("valid value");
+  });
+}
+
+docs {
+  # Request OTP - Invalid Purpose Validation
+  
+  Ensures that invalid, malformed, or unauthorized purpose strings are rejected with HTTP 400 Bad Request.
+}

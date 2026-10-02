@@ -1,0 +1,57 @@
+meta {
+  name: Request OTP - Registration
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/otp/get-otp/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "purpose": "registration",
+    "user_identifier": "{{guestIdentifier}}",
+    "otp_channel": "email"
+  }
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Unified response envelope format", function() {
+    const body = res.getBody();
+    expect(body).to.be.an("object");
+    expect(body).to.have.property("success");
+    expect(body).to.have.property("message");
+    expect(body.success).to.be.true;
+  });
+
+  test("Response message confirms OTP delivery", function() {
+    const body = res.getBody();
+    expect(body.message).to.include("OTP sent successfully");
+  });
+}
+
+docs {
+  # Request OTP for Registration
+  
+  Dispatches a one-time verification code via email for new user registration.
+  
+  - **Method**: `POST`
+  - **Path**: `/v1/otp/get-otp/`
+  - **Auth**: None (Public)
+  - **Payload**:
+    - `purpose`: `"registration"`
+    - `user_identifier`: Target email address
+    - `otp_channel`: `"email"`
+}

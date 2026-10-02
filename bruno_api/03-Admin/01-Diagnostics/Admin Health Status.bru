@@ -1,0 +1,32 @@
+meta {
+  name: Admin Health Status
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/health/
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("Status code is 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Database status is healthy", function() {
+    const body = res.getBody();
+    expect(body.status).to.equal("healthy");
+  });
+}
+
+docs {
+  # Admin Health Status
+  
+  Allows system administrators to verify core service connectivity.
+}
